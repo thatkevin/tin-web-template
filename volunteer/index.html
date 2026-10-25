@@ -1,0 +1,39 @@
+---
+layout: default
+title: Volunteer - The Tin Music and Arts
+permalink: /volunteer/
+description: Volunteer with The Tin - a grassroots music and arts charity in Coventry.
+---
+<div class="max-w-3xl mx-auto px-4 sm:px-6 py-14">
+  <p class="text-xs tracking-widest uppercase text-tin-red mb-2">Get involved</p>
+  <h1 class="text-4xl font-black tracking-tight mb-6">Volunteer</h1>
+
+  <p class="text-zinc-300 text-base leading-relaxed mb-6">
+    {% if site.data.snippets.tin_volunteer_intro.body %}{{ site.data.snippets.tin_volunteer_intro.body }}{% else %}The Tin runs on the energy of its people. As a registered charity, we rely on volunteers to
+    help us put on gigs, run projects, and keep grassroots music alive in Coventry.{% endif %}
+  </p>
+  <p class="text-zinc-400 text-sm leading-relaxed mb-8">
+    {% if site.data.snippets.tin_volunteer_detail.body %}{{ site.data.snippets.tin_volunteer_detail.body }}{% else %}Give your time instead of (or as well as) money. We always need bar staff, door staff, and
+    people to help us run events and community projects. Whether you can spare a single night or a
+    regular slot, there's a place for you here.{% endif %}
+  </p>
+
+  <h2 class="text-xl font-black mb-3">Ways to help</h2>
+  {% if site.data.snippets.tin_volunteer_ways.body %}
+  <div class="prose prose-invert prose-sm max-w-none text-zinc-400 mb-10 [&_ul]:list-disc [&_ul]:list-inside">{{ site.data.snippets.tin_volunteer_ways.html }}</div>
+  {% else %}
+  <ul class="list-disc list-inside text-sm text-zinc-400 leading-relaxed space-y-1.5 mb-10">
+    <li>Bar and front-of-house on gig nights</li>
+    <li>Door, box office, and welcoming audiences</li>
+    <li>Setting up and supporting live events and workshops</li>
+    <li>Helping with our projects &mdash; Live on Stage, Deliaphonic, and Boudica Festival</li>
+  </ul>
+  {% endif %}
+
+  <div class="flex gap-3 flex-wrap">
+    <a href="/contact/" class="inline-block bg-tin-red text-white text-sm font-black px-6 py-3 rounded hover:bg-[#c0474d] transition-colors">Register your interest</a>
+    <a href="mailto:{{ site.data.settings.email }}" class="inline-block border border-zinc-600 text-white text-sm font-bold px-6 py-3 rounded hover:border-white transition-colors">Email us</a>
+  </div>
+
+  <p class="text-xs text-zinc-600 mt-10">The Tin Music and Arts is a registered charity, no. {{ site.data.settings.charity_number | default: "1152636" }}.</p>
+</div>

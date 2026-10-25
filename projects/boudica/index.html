@@ -1,0 +1,102 @@
+---
+layout: default
+title: Boudica Festival - A Tin Music and Arts Project
+---
+
+{% assign programme = site.data.programmes | where: "slug", "boudica-festival" | first %}
+
+<!-- Breadcrumb stripe -->
+<div class="border-t-2 border-boudica bg-zinc-950 px-4 sm:px-6 py-2">
+  <div class="max-w-screen-xl mx-auto text-xs text-zinc-500 flex items-center gap-2">
+    <a href="/" class="hover:text-white">The Tin</a>
+    <span>/</span>
+    <span>/</span>
+    <span class="text-boudica font-semibold">Boudica Festival</span>
+  </div>
+</div>
+
+<!-- Hero -->
+<section class="bg-black py-20 px-4 sm:px-6">
+  <div class="max-w-screen-xl mx-auto">
+    <div class="flex items-center gap-3 mb-6">
+      <span class="w-2 h-2 rounded-full bg-boudica"></span>
+      <span class="text-xs tracking-widest uppercase text-boudica">A Tin Music and Arts Project</span>
+    </div>
+    <h1 class="text-6xl sm:text-8xl font-black tracking-tight leading-none mb-6 text-boudica">
+      Boudica Festival
+    </h1>
+    <p class="text-xl text-zinc-300 max-w-2xl leading-relaxed mb-8">
+      {% if site.data.snippets.boudica_hero_intro %}{{ site.data.snippets.boudica_hero_intro.body }}{% elsif programme and programme.description %}{{ programme.description }}{% else %}Celebrating emerging women and non-binary musicians across all genres. Firmly on the frontline in the fight against inequality in the music industry. Est. Coventry 2017.{% endif %}
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="#programme" class="bg-boudica text-black text-sm font-black px-6 py-3 rounded hover:opacity-90 transition-opacity">See the programme</a>
+      <a href="/#support" class="border border-boudica text-boudica text-sm font-bold px-6 py-3 rounded hover:bg-boudica hover:text-black transition-colors">Support Boudica</a>
+    </div>
+  </div>
+</section>
+
+<div class="h-0.5 bg-gradient-to-r from-boudica to-transparent"></div>
+
+<!-- About -->
+<section class="py-16 px-4 sm:px-6 bg-zinc-950">
+  <div class="max-w-screen-xl mx-auto max-w-2xl">
+    <p class="text-xs tracking-widest uppercase text-boudica mb-4">The festival</p>
+    <h2 class="text-3xl font-black tracking-tight mb-6">{% if site.data.snippets.boudica_about_heading %}{{ site.data.snippets.boudica_about_heading.body }}{% else %}Music without barriers{% endif %}</h2>
+    <p class="text-sm text-zinc-400 leading-relaxed mb-4">{% if site.data.snippets.boudica_about_p1 %}{{ site.data.snippets.boudica_about_p1.body }}{% else %}Boudica Festival was founded in Coventry in 2017 with a simple belief: that women and non-binary artists deserve equal space on stage. Seven years on, that mission hasn't changed.{% endif %}</p>
+    <p class="text-sm text-zinc-400 leading-relaxed mb-4">{% if site.data.snippets.boudica_about_p2 %}{{ site.data.snippets.boudica_about_p2.body }}{% else %}Each year Boudica brings together emerging and established artists from across the UK and beyond, across rock, folk, electronic, jazz, and everything in between.{% endif %}</p>
+    <p class="text-sm text-zinc-400 leading-relaxed">{% if site.data.snippets.boudica_about_p3 %}{{ site.data.snippets.boudica_about_p3.body }}{% else %}The festival is run by The Tin as part of our commitment to making Coventry's music scene more inclusive, representative, and just plain better.{% endif %}</p>
+  </div>
+</section>
+
+<!-- Programme -->
+<section id="programme" class="py-16 px-4 sm:px-6 bg-black border-t border-zinc-900">
+  <div class="max-w-screen-xl mx-auto">
+    <p class="text-xs tracking-widest uppercase text-boudica mb-2">
+      {% if programme and programme.start_date %}{{ programme.start_date | date: "%Y" }} lineup{% else %}The lineup{% endif %}
+    </p>
+    <h2 class="text-3xl font-black tracking-tight mb-10">The programme</h2>
+
+    {% if programme %}
+      {% assign prog_events = programme.events %}
+      {% if prog_events.size > 0 %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-zinc-800">
+        {% for event_ref in prog_events %}
+          {% assign event = site.data.upcoming_events | where: "slug", event_ref.slug | first %}
+          {% unless event %}{% assign event = site.data.previous_events | where: "slug", event_ref.slug | first %}{% endunless %}
+          <a href="{% if event and event.ticket_url %}{{ event.ticket_url }}{% elsif event %}/events/{{ event.slug }}/{% else %}#{% endif %}"
+             {% if event and event.ticket_url %}target="_blank" rel="noopener"{% endif %}
+             class="group bg-zinc-950 hover:bg-zinc-900 transition-colors p-6 flex flex-col gap-2">
+            <p class="text-xs text-boudica font-semibold">{{ event_ref.start_date | date: "%-d %B %Y" }}</p>
+            <h3 class="text-base font-bold leading-snug text-white group-hover:text-boudica transition-colors">{{ event_ref.name }}</h3>
+            {% if event and event.short_description %}<p class="text-xs text-zinc-500">{{ event.short_description }}</p>{% endif %}
+            {% if event %}
+            <p class="text-xs text-zinc-600 mt-auto">
+              {% if event.free_entry %}Free entry{% elsif event.ticket_url %}Tickets available{% endif %}
+            </p>
+            {% endif %}
+          </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-zinc-500 text-sm">Programme events coming soon.</p>
+      {% endif %}
+    {% else %}
+    <p class="text-zinc-500 text-sm">Programme information coming soon.</p>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Loop back -->
+<section class="py-16 px-4 sm:px-6 bg-zinc-900 border-t border-zinc-800">
+  <div class="max-w-screen-xl mx-auto flex flex-col md:flex-row gap-8 items-center">
+    <div class="flex-1">
+      <p class="text-xs tracking-widest uppercase text-tin-yellow mb-2">This is The Tin's work</p>
+      <h2 class="text-2xl font-black tracking-tight mb-3">{% if site.data.snippets.boudica_support_heading %}{{ site.data.snippets.boudica_support_heading.body }}{% else %}Boudica is only possible because of your support{% endif %}</h2>
+      <p class="text-sm text-zinc-400 leading-relaxed max-w-xl">{% if site.data.snippets.boudica_support_body %}{{ site.data.snippets.boudica_support_body.body }}{% else %}As a registered charity, The Tin relies on donations, grants, and fundraising to run festivals like Boudica. If you believe in equal representation in music, please consider supporting us.{% endif %}</p>
+    </div>
+    <div class="flex flex-col gap-3 flex-shrink-0">
+      <a href="/#support" class="bg-tin-red text-white text-sm font-black px-8 py-3 rounded hover:bg-[#c0474d] transition-colors text-center">Donate to The Tin</a>
+      <a href="/#newsletter" class="border border-zinc-600 text-zinc-300 text-sm font-semibold px-8 py-3 rounded hover:border-white hover:text-white transition-colors text-center">Stay in the Loop</a>
+    </div>
+  </div>
+</section>

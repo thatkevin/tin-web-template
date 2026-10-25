@@ -1,0 +1,307 @@
+---
+layout: default
+title: Room hire - The Tin Music and Arts
+permalink: /rooms/
+---
+<div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-12">
+
+  <div class="mb-10">
+    <p class="text-xs tracking-widest uppercase text-tin-yellow mb-1">Hire a space</p>
+    <h1 class="text-4xl font-black tracking-tight">Room hire</h1>
+    <p class="text-zinc-400 mt-3 max-w-2xl">Pick a room, choose a date and time, and send us a request. We'll confirm by email - nothing is booked until we say so.</p>
+  </div>
+
+  {% if site.data.rooms.size > 0 %}
+  <div class="space-y-px bg-zinc-800">
+    {% for room in site.data.rooms %}
+    <section id="room-{{ room.slug }}" class="bg-zinc-950 p-6 sm:p-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        {%- comment -%} Room details {%- endcomment -%}
+        <div>
+          <h2 class="text-2xl font-black tracking-tight mb-3">{{ room.name }}</h2>
+
+          {% if room.photo_urls.size > 0 %}
+          <div class="aspect-[16/9] overflow-hidden rounded-lg mb-4">
+            <img src="{{ room.photo_urls[0] }}" alt="{{ room.name }}" class="w-full h-full object-cover grayscale-[10%]" />
+          </div>
+          {% endif %}
+
+          <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm mb-4">
+            {% if room.capacity_seated %}<div><dt class="text-xs uppercase tracking-wider text-zinc-500">Seated</dt><dd class="text-zinc-200">{{ room.capacity_seated }}</dd></div>{% endif %}
+            {% if room.capacity_standing %}<div><dt class="text-xs uppercase tracking-wider text-zinc-500">Standing</dt><dd class="text-zinc-200">{{ room.capacity_standing }}</dd></div>{% endif %}
+            {% if room.hourly_rate %}<div><dt class="text-xs uppercase tracking-wider text-zinc-500">Per hour</dt><dd class="text-zinc-200">&pound;{{ room.hourly_rate }}</dd></div>{% endif %}
+            {% if room.day_rate %}<div><dt class="text-xs uppercase tracking-wider text-zinc-500">Per day</dt><dd class="text-zinc-200">&pound;{{ room.day_rate }}</dd></div>{% endif %}
+            {% if room.pa_included %}<div><dt class="text-xs uppercase tracking-wider text-zinc-500">PA</dt><dd class="text-zinc-200">Included</dd></div>{% endif %}
+          </dl>
+
+          {% if room.pa_spec %}<p class="text-sm text-zinc-400 mb-2"><span class="text-zinc-500">PA: </span>{{ room.pa_spec }}</p>{% endif %}
+          {% if room.gear_list %}<p class="text-sm text-zinc-400 mb-2"><span class="text-zinc-500">Gear: </span>{{ room.gear_list }}</p>{% endif %}
+          {% if room.hire_notes %}<p class="text-sm text-zinc-400 mb-2">{{ room.hire_notes }}</p>{% endif %}
+          {% if room.accessibility_notes %}<p class="text-sm text-zinc-400">{{ room.accessibility_notes }}</p>{% endif %}
+        </div>
+
+        {%- comment -%} Booking request form {%- endcomment -%}
+        <div>
+          <form class="tin-booking-form space-y-4"
+                data-room-slug="{{ room.slug }}"
+                data-room-id="{{ room.id }}"
+                data-venue-slug="{{ site.data.settings.slug }}"
+                data-hourly-rate="{{ room.hourly_rate }}"
+                data-min-minutes="{{ room.min_booking_minutes }}"
+                data-max-minutes="{{ room.max_booking_minutes }}"
+                data-window-days="{{ room.booking_window_days }}"
+                data-increment="{{ room.increment_minutes }}"
+                data-opening-hours='{{ room.opening_hours | jsonify }}'
+                data-discount-tiers='{{ room.discount_tiers | jsonify }}'>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Name *</label>
+                <input type="text" name="name" required class="w-full bg-zinc-900 border border-zinc-700 rounded px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Email *</label>
+                <input type="email" name="email" required class="w-full bg-zinc-900 border border-zinc-700 rounded px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Phone</label>
+              <input type="tel" name="phone" class="w-full bg-zinc-900 border border-zinc-700 rounded px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Date *</label>
+                <input type="date" name="date" required class="w-full bg-zinc-900 border border-zinc-700 rounded px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">From *</label>
+                <select name="start_time" required class="tin-time-select w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow"></select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">To *</label>
+                <select name="end_time" required class="tin-time-select w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow"></select>
+              </div>
+            </div>
+
+            <p class="tin-slot-note text-xs text-zinc-500 hidden"></p>
+            <p class="tin-booking-quote text-sm text-zinc-200 hidden"></p>
+
+            {% if room.hire_types.size > 0 %}
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Hire type *</label>
+              <select name="hire_type" required class="w-full bg-zinc-900 border border-zinc-700 rounded px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow">
+                {% for type in room.hire_types %}<option value="{{ type }}">{{ type | capitalize }}</option>{% endfor %}
+              </select>
+            </div>
+            {% endif %}
+
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Anything else?</label>
+              <textarea name="notes" rows="3" class="w-full bg-zinc-900 border border-zinc-700 rounded px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow resize-y"></textarea>
+            </div>
+
+            <button type="submit" class="bg-tin-yellow text-black text-sm font-black px-8 py-3 rounded hover:bg-[#d4b040] transition-colors">
+              Request this room
+            </button>
+            <p class="tin-booking-msg text-sm mt-2 hidden"></p>
+          </form>
+
+          {%- comment -%} Already-booked slots, read-only {%- endcomment -%}
+          {% assign room_bookings = site.data.bookings | where: "room_id", room.id %}
+          {% if room_bookings.size > 0 %}
+          <div class="mt-6 border-t border-zinc-800 pt-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Already booked</p>
+            <ul class="text-sm text-zinc-400 space-y-1">
+              {% for slot in room_bookings %}
+              <li><time datetime="{{ slot.starts_at }}">{{ slot.starts_at | date: "%a %-d %b, %H:%M" }}</time> &ndash; {{ slot.ends_at | date: "%H:%M" }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </section>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="bg-zinc-900 rounded-xl p-16 text-center">
+    <p class="text-zinc-400">No rooms are available to hire online right now. <a href="/contact/" class="text-tin-yellow hover:underline">Get in touch</a> and we'll help.</p>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+(function () {
+  if (!window.fetch) return;
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function toMin(hhmm) { if (!hhmm) return null; var p = hhmm.split(':'); return (parseInt(p[0], 10) * 60) + parseInt(p[1], 10); }
+  function toHHMM(min) { return pad(Math.floor(min / 60)) + ':' + pad(min % 60); }
+  function parseJSON(str, fallback) { try { return JSON.parse(str); } catch (e) { return fallback; } }
+  function dateStr(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function dayKey(str) {
+    var d = new Date(str + 'T00:00:00');
+    return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][d.getDay()];
+  }
+  function iso(date, time) { if (!date || !time) return ''; return date + 'T' + time + ':00'; }
+
+  document.querySelectorAll('.tin-booking-form').forEach(function (form) {
+    var msg = form.querySelector('.tin-booking-msg');
+    var note = form.querySelector('.tin-slot-note');
+    var quoteEl = form.querySelector('.tin-booking-quote');
+    var dateInput = form.querySelector('[name=date]');
+    var startSel = form.querySelector('[name=start_time]');
+    var endSel = form.querySelector('[name=end_time]');
+
+    var cfg = {
+      venueSlug: form.dataset.venueSlug,
+      roomId: form.dataset.roomId,
+      rate: parseFloat(form.dataset.hourlyRate) || 0,
+      minMin: parseInt(form.dataset.minMinutes, 10) || 30,
+      maxMin: parseInt(form.dataset.maxMinutes, 10) || 0,
+      windowDays: parseInt(form.dataset.windowDays, 10) || 60,
+      increment: parseInt(form.dataset.increment, 10) || 30,
+      openingHours: parseJSON(form.dataset.openingHours, {}),
+      tiers: parseJSON(form.dataset.discountTiers, [])
+    };
+
+    var current = null; // { closed, open, close, taken: [{starts_at, ends_at}] }
+
+    // Constrain the date field to [today, today + window].
+    var today = new Date();
+    var todayStr = dateStr(today);
+    dateInput.min = todayStr;
+    dateInput.max = dateStr(new Date(today.getTime() + (cfg.windowDays * 86400000)));
+
+    function showNote(text) {
+      if (text) { note.textContent = text; note.classList.remove('hidden'); } else { note.classList.add('hidden'); }
+    }
+    function clearSel(sel) { sel.innerHTML = '<option value="">--</option>'; }
+
+    function localWindow(str) {
+      var w = cfg.openingHours[dayKey(str)];
+      if (!w || !w.open || !w.close) return { closed: true, taken: [] };
+      return { closed: false, open: w.open, close: w.close, taken: [] };
+    }
+
+    function takenContains(min) {
+      return current.taken.some(function (t) { return min >= toMin(t.starts_at) && min < toMin(t.ends_at); });
+    }
+    function nextTakenStart(min) {
+      var starts = current.taken.map(function (t) { return toMin(t.starts_at); })
+        .filter(function (s) { return s > min; }).sort(function (a, b) { return a - b; });
+      return starts.length ? starts[0] : null;
+    }
+
+    function buildStartOptions() {
+      clearSel(startSel); clearSel(endSel);
+      if (!current || current.closed) { showNote('Closed on this day - please pick another date.'); return; }
+
+      var openM = toMin(current.open), closeM = toMin(current.close), inc = cfg.increment;
+      var isToday = dateInput.value === todayStr;
+      var nowMin = isToday ? ((new Date()).getHours() * 60) + (new Date()).getMinutes() : -1;
+
+      for (var t = openM; t <= closeM - inc; t += inc) {
+        if (t <= nowMin) continue;            // no past times today
+        if (takenContains(t)) continue;       // can't start inside a taken block
+        var next = nextTakenStart(t);
+        var limit = next === null ? closeM : Math.min(closeM, next);
+        if (limit - t < cfg.minMin) continue; // not enough room for a minimum booking
+        var o = document.createElement('option'); o.value = toHHMM(t); o.textContent = toHHMM(t);
+        startSel.appendChild(o);
+      }
+      showNote(startSel.options.length <= 1 ? 'No free slots on this day - please pick another date.' : '');
+    }
+
+    function buildEndOptions() {
+      clearSel(endSel);
+      var s = toMin(startSel.value); if (s === null) return;
+      var closeM = toMin(current.close);
+      var next = nextTakenStart(s);
+      var maxEnd = next === null ? closeM : Math.min(closeM, next);
+      if (cfg.maxMin) maxEnd = Math.min(maxEnd, s + cfg.maxMin);
+      for (var t = s + cfg.minMin; t <= maxEnd; t += cfg.increment) {
+        var o = document.createElement('option'); o.value = toHHMM(t); o.textContent = toHHMM(t);
+        endSel.appendChild(o);
+      }
+    }
+
+    function updateQuote() {
+      var s = toMin(startSel.value), e = toMin(endSel.value);
+      if (s === null || e === null || e <= s || !cfg.rate) { quoteEl.classList.add('hidden'); return; }
+      var hours = (e - s) / 60;
+      var pct = 0;
+      cfg.tiers.slice().sort(function (a, b) { return b.hours - a.hours; }).some(function (tier) {
+        if (hours >= tier.hours) { pct = tier.percent; return true; } return false;
+      });
+      var total = (cfg.rate * hours) * (1 - (pct / 100));
+      var txt = hours + (hours === 1 ? ' hour' : ' hours') + ' · £' + total.toFixed(2);
+      if (pct > 0) txt += ' (' + pct + '% block discount)';
+      quoteEl.textContent = txt; quoteEl.classList.remove('hidden');
+    }
+
+    function loadAvailability() {
+      clearSel(startSel); clearSel(endSel); quoteEl.classList.add('hidden');
+      var date = dateInput.value;
+      if (!date) { showNote(''); return; }
+      showNote('Checking availability...');
+      var url = '/api/bookings/availability?venue_slug=' + encodeURIComponent(cfg.venueSlug) +
+                '&room_id=' + encodeURIComponent(cfg.roomId) + '&date=' + encodeURIComponent(date);
+      fetch(url, { headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.json(); })
+        .then(function (json) {
+          current = (json && typeof json.closed !== 'undefined')
+            ? { closed: json.closed, open: json.open, close: json.close, taken: json.taken || [] }
+            : localWindow(date);
+          buildStartOptions();
+        })
+        .catch(function () { current = localWindow(date); buildStartOptions(); });
+    }
+
+    dateInput.addEventListener('change', loadAvailability);
+    startSel.addEventListener('change', function () { buildEndOptions(); updateQuote(); });
+    endSel.addEventListener('change', updateQuote);
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var date = dateInput.value, start = startSel.value, end = endSel.value;
+      var show = function (text, ok) {
+        msg.classList.remove('hidden'); msg.textContent = text;
+        msg.className = 'tin-booking-msg text-sm mt-2 ' + (ok ? 'text-emerald-400' : 'text-red-400');
+      };
+      if (!date || !start || !end) { show('Please choose a date, start and end time.', false); return; }
+      if (start >= end) { show('The end time must be after the start time.', false); return; }
+
+      var hireTypeField = form.querySelector('[name=hire_type]');
+      var body = new FormData();
+      body.append('venue_slug', cfg.venueSlug);
+      body.append('room_id', cfg.roomId);
+      body.append('name', form.querySelector('[name=name]').value);
+      body.append('email', form.querySelector('[name=email]').value);
+      body.append('phone', form.querySelector('[name=phone]').value);
+      body.append('starts_at', iso(date, start));
+      body.append('ends_at', iso(date, end));
+      body.append('hire_type', hireTypeField ? hireTypeField.value : '');
+      body.append('notes', form.querySelector('[name=notes]').value);
+
+      fetch('/api/bookings', { method: 'POST', headers: { 'Accept': 'application/json' }, body: body })
+        .then(function (r) { return r.json(); })
+        .then(function (json) {
+          if (json.ok) {
+            show("Request sent. We'll be in touch to confirm.", true);
+            form.querySelectorAll('input,select,textarea,button').forEach(function (el) { el.disabled = true; });
+          } else {
+            show(json.error || 'Something went wrong.', false);
+            loadAvailability(); // a clash or stale slot - refresh the picker
+          }
+        })
+        .catch(function () { show('Something went wrong - please try again.', false); });
+    });
+  });
+}());
+</script>

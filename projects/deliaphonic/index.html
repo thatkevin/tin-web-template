@@ -1,0 +1,116 @@
+---
+layout: default
+title: Deliaphonic - A Tin Music and Arts Project
+extra_head: '<style>.delia-glow { text-shadow: 0 0 20px rgba(0,212,232,.6), 0 0 60px rgba(0,212,232,.2); }</style>'
+---
+
+{% assign programme = site.data.programmes | where: "slug", "deliaphonic" | first %}
+
+<!-- Breadcrumb stripe -->
+<div class="border-t-2 border-delia-cyan bg-zinc-950 px-4 sm:px-6 py-2">
+  <div class="max-w-screen-xl mx-auto text-xs text-zinc-500 flex items-center gap-2">
+    <a href="/" class="hover:text-white">The Tin</a>
+    <span>/</span>
+    <span>/</span>
+    <span class="text-delia-cyan font-semibold">Deliaphonic</span>
+  </div>
+</div>
+
+<!-- Hero -->
+<section class="bg-black py-20 px-4 sm:px-6">
+  <div class="max-w-screen-xl mx-auto">
+    <div class="flex items-center gap-3 mb-6">
+      <span class="w-2 h-2 rounded-full bg-delia-cyan"></span>
+      <span class="text-xs tracking-widest uppercase text-delia-cyan">A Tin Music and Arts Project</span>
+    </div>
+    <h1 class="text-6xl sm:text-8xl font-black tracking-tight leading-none mb-6 delia-glow">
+      <span class="text-delia-cyan">Delia</span><span class="text-delia-red">phonic</span>
+    </h1>
+    <p class="text-xl text-zinc-300 max-w-2xl leading-relaxed mb-8">
+      {% if site.data.snippets.delia_hero_intro %}{{ site.data.snippets.delia_hero_intro.body }}{% elsif programme and programme.description %}{{ programme.description }}{% else %}A celebration of the life and work of electronic music pioneer Delia Derbyshire - born in Coventry in 1937 - in her home city.{% endif %}
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="#programme" class="bg-delia-cyan text-black text-sm font-black px-6 py-3 rounded hover:bg-[#00b8cc] transition-colors">See the programme</a>
+      <a href="/#support" class="border border-delia-cyan text-delia-cyan text-sm font-bold px-6 py-3 rounded hover:bg-delia-cyan hover:text-black transition-colors">Support Deliaphonic</a>
+    </div>
+  </div>
+</section>
+
+<div class="h-0.5 bg-gradient-to-r from-delia-cyan via-delia-red to-transparent"></div>
+
+<!-- About -->
+<section class="py-16 px-4 sm:px-6 bg-zinc-950">
+  <div class="max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+    <div>
+      <p class="text-xs tracking-widest uppercase text-delia-cyan mb-4">The story</p>
+      <h2 class="text-3xl font-black tracking-tight mb-6">{% if site.data.snippets.delia_about_heading %}{{ site.data.snippets.delia_about_heading.body }}{% else %}Who was Delia Derbyshire?{% endif %}</h2>
+      <p class="text-sm text-zinc-400 leading-relaxed mb-4">{% if site.data.snippets.delia_about_p1 %}{{ site.data.snippets.delia_about_p1.body }}{% else %}Delia Derbyshire was born in Coventry in 1937. A pioneering electronic composer, her work at the BBC Radiophonic Workshop shaped the sound of a generation - including the original Doctor Who theme. She was decades ahead of her time.{% endif %}</p>
+      <p class="text-sm text-zinc-400 leading-relaxed mb-4">{% if site.data.snippets.delia_about_p2 %}{{ site.data.snippets.delia_about_p2.body }}{% else %}Deliaphonic brings her spirit back home to Coventry through live performances, immersive installations, film screenings, and Delia Derbyshire Day - an annual celebration of her life and music.{% endif %}</p>
+      <p class="text-sm text-zinc-400 leading-relaxed">{% if site.data.snippets.delia_about_p3 %}{{ site.data.snippets.delia_about_p3.body }}{% else %}Run by The Tin as part of our charitable mission to connect Coventry with its creative heritage - and to inspire the next generation of musicians to take risks.{% endif %}</p>
+    </div>
+    <div class="flex items-center justify-center">
+      <svg viewBox="0 0 300 180" class="w-full max-w-sm" aria-label="Deliaphonic logo">
+        <circle cx="120" cy="90" r="85" fill="#00d4e8" opacity="0.85"/>
+        <circle cx="180" cy="90" r="85" fill="#e8002a" opacity="0.85"/>
+        <text x="150" y="97" text-anchor="middle" font-family="Nunito,sans-serif" font-size="28" font-weight="900" fill="#000" letter-spacing="-1">Deliaphonic</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- Programme -->
+<section id="programme" class="py-16 px-4 sm:px-6 bg-black border-t border-zinc-900">
+  <div class="max-w-screen-xl mx-auto">
+    <p class="text-xs tracking-widest uppercase text-delia-cyan mb-2">
+      {% if programme and programme.start_date %}{{ programme.start_date | date: "%Y" }} programme{% else %}The programme{% endif %}
+    </p>
+    <h2 class="text-3xl font-black tracking-tight mb-10">The programme</h2>
+
+    {% if programme %}
+      {% assign prog_events = programme.events %}
+      {% if prog_events.size > 0 %}
+      <div class="flex flex-col divide-y divide-zinc-900">
+        {% for event_ref in prog_events %}
+          {% assign event = site.data.upcoming_events | where: "slug", event_ref.slug | first %}
+          {% unless event %}{% assign event = site.data.previous_events | where: "slug", event_ref.slug | first %}{% endunless %}
+          <div class="py-5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 group hover:bg-zinc-950 px-2 -mx-2 rounded transition-colors">
+            <span class="text-sm font-bold text-delia-cyan min-w-[160px]">{{ event_ref.start_date | date: "%-d %b %Y" }}</span>
+            <span class="text-base font-semibold text-white flex-1">
+              {% if event %}
+                <a href="{% if event.ticket_url %}{{ event.ticket_url }}{% else %}/events/{{ event.slug }}/{% endif %}"
+                   {% if event.ticket_url %}target="_blank" rel="noopener"{% endif %}
+                   class="hover:text-delia-cyan transition-colors">{{ event_ref.name }}</a>
+              {% else %}
+                {{ event_ref.name }}
+              {% endif %}
+            </span>
+            {% if event and event.locations.size > 0 %}<span class="text-xs text-zinc-500">{{ event.locations[0].name }}</span>{% endif %}
+            <span class="text-sm font-bold text-delia-cyan">
+              {% if event %}{% if event.free_entry %}Free{% elsif event.ticket_url %}Tickets{% endif %}{% endif %}
+            </span>
+          </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-zinc-500 text-sm">Programme events coming soon.</p>
+      {% endif %}
+    {% else %}
+    <p class="text-zinc-500 text-sm">Programme information coming soon.</p>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Loop back -->
+<section class="py-16 px-4 sm:px-6 bg-zinc-900 border-t border-zinc-800">
+  <div class="max-w-screen-xl mx-auto flex flex-col md:flex-row gap-8 items-center">
+    <div class="flex-1">
+      <p class="text-xs tracking-widest uppercase text-tin-yellow mb-2">This is The Tin's work</p>
+      <h2 class="text-2xl font-black tracking-tight mb-3">{% if site.data.snippets.delia_support_heading %}{{ site.data.snippets.delia_support_heading.body }}{% else %}Deliaphonic is only possible because of your support{% endif %}</h2>
+      <p class="text-sm text-zinc-400 leading-relaxed max-w-xl">{% if site.data.snippets.delia_support_body %}{{ site.data.snippets.delia_support_body.body }}{% else %}As a registered charity, The Tin relies on donations, grants, and fundraising to run projects like Deliaphonic. If you believe in bringing Coventry's creative heritage to life, please consider supporting us.{% endif %}</p>
+    </div>
+    <div class="flex flex-col gap-3 flex-shrink-0">
+      <a href="/#support" class="bg-tin-red text-white text-sm font-black px-8 py-3 rounded hover:bg-[#c0474d] transition-colors text-center">Donate to The Tin</a>
+      <a href="/#newsletter" class="border border-zinc-600 text-zinc-300 text-sm font-semibold px-8 py-3 rounded hover:border-white hover:text-white transition-colors text-center">Stay in the Loop</a>
+    </div>
+  </div>
+</section>

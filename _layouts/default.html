@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% if page.title %}{{ page.title }} — {% endif %}{{ site.data.settings.name }}</title>
+
+  {% comment %} #834: one concise, plain-text description for meta + OG + Twitter — prefers page.meta_description (set per page type in LiquidRenderer), then a stripped page.description, then a site default. {% endcomment %}
+  {% capture meta_desc_src %}{% if page.meta_description %}{{ page.meta_description }}{% elsif page.description %}{{ page.description }}{% else %}{{ site.data.settings.name }} — live music and arts in Coventry.{% endif %}{% endcapture %}
+  {% assign meta_desc = meta_desc_src | strip_html | strip | truncate: 160 %}
+  <meta name="description" content="{{ meta_desc }}" />
+
+  {% comment %} #616: per-page canonical + social share (Open Graph / Twitter) tags {% endcomment %}
+  {% capture og_title %}{% if page.title %}{{ page.title }}{% else %}{{ site.data.settings.name }}{% endif %}{% endcapture %}
+  {% assign og_desc = meta_desc %}
+  <link rel="canonical" href="{{ page.url | absolute_url }}" />
+  <meta property="og:type" content="{% if page.start_date %}event{% else %}website{% endif %}" />
+  <meta property="og:site_name" content="{{ site.data.settings.name }}" />
+  <meta property="og:title" content="{{ og_title | strip }}" />
+  <meta property="og:description" content="{{ og_desc | strip }}" />
+  <meta property="og:url" content="{{ page.url | absolute_url }}" />
+  {% if page.image %}<meta property="og:image" content="{{ page.image.large | default: page.image.medium | absolute_url }}" />{% endif %}
+  <meta name="twitter:card" content="{% if page.image %}summary_large_image{% else %}summary{% endif %}" />
+  <meta name="twitter:title" content="{{ og_title | strip }}" />
+  <meta name="twitter:description" content="{{ og_desc | strip }}" />
+  {% if page.image %}<meta name="twitter:image" content="{{ page.image.large | default: page.image.medium | absolute_url }}" />{% endif %}
+
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Nunito', 'sans-serif'] },
+          colors: {
+            'tin-red':    '#d85b61',
+            'tin-yellow': '#edc656',
+            'tin-teal':   '#0b8793',
+            'delia-cyan': '#00d4e8',
+            'delia-red':  '#e8002a',
+            'boudica':    '#c9a84c',
+            'los':        '#f97316',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .8s ease; }
+    .hero-slide.active { opacity: 1; }
+    .tin-logo-the { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; writing-mode: vertical-lr; color: white; transform: rotate(180deg); }
+    .tin-logo-tin { font-size: 2.6rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1; animation: neonThrob 3s ease-in-out infinite; }
+    @keyframes neonThrob {
+      0%, 100% { text-shadow: 0 0 6px rgba(216,91,97,0.4), 0 0 14px rgba(216,91,97,0.15); }
+      50% { text-shadow: 0 0 12px rgba(216,91,97,0.95), 0 0 30px rgba(216,91,97,0.7), 0 0 60px rgba(216,91,97,0.4), 0 0 90px rgba(216,91,97,0.15); }
+    }
+    .mob-sub-link {
+      font-size: clamp(1.4rem, 5.5vw, 2.3rem);
+      font-weight: 800; letter-spacing: -0.01em; line-height: 1.2;
+      color: rgba(255,255,255,0.65); transition: color 0.15s;
+    }
+    .mob-sub-link:hover { color: #fff; }
+    @keyframes megaSlideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .mega-panel-open { animation: megaSlideDown 0.18s ease forwards; }
+    :focus-visible { outline: 2px solid #edc656; outline-offset: 3px; border-radius: 2px; }
+    .nav-trigger[aria-expanded="true"] { color: #ffffff; }
+    .nav-trigger[aria-expanded="true"] .nav-chevron { transform: rotate(180deg); opacity: 1; }
+    #mobile-menu {
+      opacity: 0; visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    }
+    #mobile-menu.mob-open {
+      opacity: 1; visibility: visible;
+      transition: opacity 0.3s ease;
+    }
+    .mob-fs-link {
+      font-size: clamp(1.8rem, 7vw, 3rem);
+      font-weight: 900; letter-spacing: -0.02em; line-height: 1.1;
+      color: #fff; transition: color 0.15s;
+    }
+    .mob-fs-link:hover { color: #d85b61; }
+    /* Mobile sub-menu links: clearly tappable rows with a right chevron. */
+    .mob-link::after {
+      content: "\203A"; margin-left: auto; padding-left: 0.75rem;
+      color: #d85b61; font-weight: 800; font-size: 1.5em; line-height: 0.7;
+      flex-shrink: 0;
+    }
+  </style>
+  {% if page.extra_head %}{{ page.extra_head }}{% endif %}
+  {% if site.data.settings.analytics_snippet %}{{ site.data.settings.analytics_snippet }}{% endif %}
+</head>
+<body class="bg-zinc-950 text-white font-sans antialiased">
+
+<!-- =====================================================================
+     HEADER
+     ===================================================================== -->
+<header class="sticky top-0 z-50 bg-black border-b border-zinc-800" id="site-header">
+
+
+  <!-- Main nav -->
+  <div class="max-w-screen-xl mx-auto px-4 sm:px-6 flex items-center h-16">
+
+    <!-- Logo -->
+    <a href="/" class="flex-shrink-0 flex flex-row items-center gap-1.5 leading-none hover:opacity-80 transition-opacity py-1" aria-label="{{ site.data.settings.name }} home">
+      <span class="tin-logo-the">The</span>
+      <span class="tin-logo-tin text-white">Tin</span>
+    </a>
+
+    <!-- Desktop nav -->
+    <nav class="hidden lg:flex items-center flex-1 ml-8" aria-label="Main navigation" id="desktop-nav">
+      {% for item in site.data.settings.navigation.primary %}
+        {% if item.path contains "#megamenu-" %}
+          {% assign megaid = item.path | remove: "#megamenu-" %}
+          <button class="nav-trigger px-4 py-2 text-sm font-semibold text-zinc-300 hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+                  data-megamenu="{{ megaid }}" aria-expanded="false" aria-controls="megamenu-{{ megaid }}">
+            {{ item.label }}
+            <svg class="nav-chevron w-3 h-3 opacity-50 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+        {% else %}
+          <a href="{{ item.path }}" class="px-4 py-2 text-sm font-semibold text-zinc-300 hover:text-white transition-colors whitespace-nowrap">{{ item.label }}</a>
+        {% endif %}
+      {% endfor %}
+    </nav>
+
+    <!-- Desktop CTA -->
+    <div class="hidden lg:flex items-center gap-1 ml-auto flex-shrink-0">
+      <a href="/support/" class="ml-2 inline-flex items-center bg-tin-red text-white text-sm font-bold px-5 py-2 rounded hover:bg-[#c0474d] transition-colors">
+        Support Us
+      </a>
+    </div>
+
+    <!-- Mobile controls -->
+    <div class="lg:hidden ml-auto flex items-center gap-0.5">
+      <button id="mobile-open-btn"
+              class="flex items-center gap-2 px-3 py-2 text-sm font-bold text-zinc-300 hover:text-white transition-colors rounded"
+              aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+        Menu
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Mega: About -->
+  <div id="megamenu-about" class="mega-panel hidden absolute left-0 right-0 bg-zinc-950 border-t border-zinc-800 shadow-2xl"
+       role="dialog" aria-label="About Us menu">
+    <div class="max-w-screen-xl mx-auto px-6 py-10 grid grid-cols-3 gap-10">
+      {% assign about = site.data.settings.mega_menu.about %}
+      {% if about.columns and about.columns.size > 0 %}
+        {% for col in about.columns %}
+        <div>
+          <h3 class="text-[10px] font-bold tracking-widest uppercase text-tin-red mb-4">{{ col.heading }}</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed mb-5">{{ col.body }}</p>
+          {% if col.link.label != "" %}<a href="{{ col.link.target }}" class="text-sm font-semibold text-white hover:text-tin-yellow transition-colors">{{ col.link.label }} →</a>{% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+      <div>
+        <h3 class="text-[10px] font-bold tracking-widest uppercase text-tin-red mb-4">Who We Are</h3>
+        <p class="text-sm text-zinc-400 leading-relaxed mb-5">{% if site.data.snippets.tin_about_who_we_are %}{{ site.data.snippets.tin_about_who_we_are.body }}{% else %}The Tin is a registered charity (No. {{ site.data.settings.charity_number | default: "1152636" }}) running a grassroots music venue and arts organisation at the Canal Basin in Coventry. Every ticket and donation helps us support local artists, nurture new talent, and keep culture accessible to everyone.{% endif %}</p>
+        <a href="/about" class="text-sm font-semibold text-white hover:text-tin-yellow transition-colors">Our mission →</a>
+      </div>
+      <div>
+        <h3 class="text-[10px] font-bold tracking-widest uppercase text-tin-red mb-4">Our Venue</h3>
+        <p class="text-sm text-zinc-400 leading-relaxed mb-5">{% if site.data.snippets.tin_about_our_venue %}{{ site.data.snippets.tin_about_our_venue.body }}{% else %}{{ site.data.settings.address }}. An intimate, atmospheric venue built for live music — small enough to feel every moment, big enough to make noise.{% endif %}</p>
+        <a href="/#find-us" class="text-sm font-semibold text-white hover:text-tin-yellow transition-colors">Find us →</a>
+      </div>
+      <div>
+        <h3 class="text-[10px] font-bold tracking-widest uppercase text-tin-red mb-4">Accessibility</h3>
+        <p class="text-sm text-zinc-400 leading-relaxed mb-5">{% if site.data.snippets.tin_about_accessibility %}{{ site.data.snippets.tin_about_accessibility.body }}{% else %}Step-free access, accessible facilities, and clear information to help you plan a comfortable visit to the Coal Vaults.{% endif %}</p>
+        <a href="/accessibility/" class="text-sm font-semibold text-white hover:text-tin-yellow transition-colors">Plan your visit →</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Mega: Projects -->
+  <div id="megamenu-projects" class="mega-panel hidden absolute left-0 right-0 bg-zinc-950 border-t border-zinc-800 shadow-2xl"
+       role="dialog" aria-label="Our Projects menu">
+    <div class="max-w-screen-xl mx-auto px-6 py-10">
+      {% assign projects = site.data.settings.mega_menu.projects %}
+      <div class="grid grid-cols-3 gap-6">
+      {% if projects.columns and projects.columns.size > 0 %}
+        {% for col in projects.columns %}
+        <div>
+          <h3 class="text-[10px] font-bold tracking-widest uppercase text-tin-yellow mb-4">{{ col.heading }}</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed mb-5">{{ col.body }}</p>
+          {% if col.link.label != "" %}<a href="{{ col.link.target }}" class="text-sm font-semibold text-white hover:text-tin-yellow transition-colors">{{ col.link.label }} →</a>{% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <a href="/projects/deliaphonic/"
+           class="group block p-6 bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors border-t-2 border-delia-cyan">
+          <div class="flex items-center gap-2.5 mb-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-delia-cyan flex-shrink-0" aria-hidden="true"></span>
+            <h3 class="text-base font-bold text-white">Deliaphonic</h3>
+          </div>
+          {% assign delia = site.data.programmes | where: "slug", "deliaphonic" | first %}
+          <p class="text-sm text-zinc-400 leading-relaxed mb-5">{% if delia %}{{ delia.description | truncate: 120 }}{% else %}Celebrating the pioneering electronic music of Delia Derbyshire. Gigs, talks, workshops, and listening events rooted in Coventry's sonic heritage.{% endif %}</p>
+          <span class="text-xs font-bold text-delia-cyan group-hover:underline">Explore Deliaphonic →</span>
+        </a>
+        <a href="/projects/boudica/"
+           class="group block p-6 bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors border-t-2 border-boudica">
+          <div class="flex items-center gap-2.5 mb-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-boudica flex-shrink-0" aria-hidden="true"></span>
+            <h3 class="text-base font-bold text-white">Boudica Festival</h3>
+          </div>
+          {% assign boudica = site.data.programmes | where: "slug", "boudica-festival" | first %}
+          <p class="text-sm text-zinc-400 leading-relaxed mb-5">{% if boudica %}{{ boudica.description | truncate: 120 }}{% else %}An annual festival celebrating women and non-binary artists in music. Platforming underrepresented voices on the Tin stage and beyond.{% endif %}</p>
+          <span class="text-xs font-bold text-boudica group-hover:underline">Explore Boudica →</span>
+        </a>
+        <a href="/projects/live-on-stage/"
+           class="group block p-6 bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors border-t-2 border-los">
+          <div class="flex items-center gap-2.5 mb-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-los flex-shrink-0" aria-hidden="true"></span>
+            <h3 class="text-base font-bold text-white">Live on Stage</h3>
+          </div>
+          {% assign los = site.data.programmes | where: "slug", "live-on-stage" | first %}
+          <p class="text-sm text-zinc-400 leading-relaxed mb-5">{% if los %}{{ los.description | truncate: 120 }}{% else %}Young musicians form bands, write songs, and perform live. For instrumentalists aged 11–18 at Grade 4 and above.{% endif %}</p>
+          <span class="text-xs font-bold text-los group-hover:underline">Explore Live on Stage →</span>
+        </a>
+      {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Mega: Use our Space -->
+  <div id="megamenu-space" class="mega-panel hidden absolute left-0 right-0 bg-zinc-950 border-t border-zinc-800 shadow-2xl"
+       role="dialog" aria-label="Use our Space menu">
+    <div class="max-w-screen-xl mx-auto px-6 py-10 grid grid-cols-3 gap-10">
+      {% assign space = site.data.settings.mega_menu.space %}
+      {% if space.columns and space.columns.size > 0 %}
+        {% for col in space.columns %}
+        <div>
+          <h3 class="text-[10px] font-bold tracking-widest uppercase text-tin-teal mb-4">{{ col.heading }}</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed mb-5">{{ col.body }}</p>
+          {% if col.link.label != "" %}<a href="{{ col.link.target }}" class="text-sm font-semibold text-white hover:text-tin-teal transition-colors">{{ col.link.label }} →</a>{% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+      <div>
+        <h3 class="text-[10px] font-bold tracking-widest uppercase text-tin-teal mb-4">Venue Hire</h3>
+        <p class="text-sm text-zinc-400 leading-relaxed mb-5">{% if site.data.snippets.tin_space_hire %}{{ site.data.snippets.tin_space_hire.body }}{% else %}Host your event, launch, or private hire at the Coal Vaults. Fully equipped stage, sound, and lighting. Capacity up to 200.{% endif %}</p>
+        <a href="/venue-hire" class="text-sm font-semibold text-white hover:text-tin-teal transition-colors">Book the venue →</a>
+      </div>
+      <div>
+        <h3 class="text-[10px] font-bold tracking-widest uppercase text-tin-teal mb-4">Rehearsal Rooms</h3>
+        <p class="text-sm text-zinc-400 leading-relaxed mb-5">{% if site.data.snippets.tin_space_rehearsal %}{{ site.data.snippets.tin_space_rehearsal.body }}{% else %}Two rehearsal rooms available for bands and solo artists. Affordable rates because we're a charity, not a property developer.{% endif %}</p>
+        <a href="/rehearsal-rooms" class="text-sm font-semibold text-white hover:text-tin-teal transition-colors">See rates →</a>
+      </div>
+      <div>
+        <h3 class="text-[10px] font-bold tracking-widest uppercase text-tin-teal mb-4">Get in Touch</h3>
+        <p class="text-sm text-zinc-400 leading-relaxed mb-5">{% if site.data.snippets.tin_space_contact %}{{ site.data.snippets.tin_space_contact.body }}{% else %}Not sure what you need? Drop us a line and we'll figure it out together.{% endif %}</p>
+        {% if site.data.settings.email %}
+        <a href="mailto:{{ site.data.settings.email }}" class="text-sm font-semibold text-white hover:text-tin-teal transition-colors">{{ site.data.settings.email }} →</a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</header>
+
+<!-- Nav backdrop -->
+<div id="nav-backdrop" class="hidden fixed inset-0 z-40 bg-black/60" aria-hidden="true"></div>
+
+<!-- Mobile menu — full-screen overlay -->
+<div id="mobile-menu"
+     class="fixed inset-0 z-50 bg-black flex flex-col overflow-y-auto"
+     aria-hidden="true" role="dialog" aria-label="Mobile navigation">
+
+  <!-- Top bar -->
+  <div class="flex items-center justify-between px-6 py-5 border-b border-zinc-900 flex-shrink-0">
+    <a href="/" class="flex flex-row items-center gap-1.5 leading-none" tabindex="-1">
+      <span class="tin-logo-the">The</span>
+      <span class="tin-logo-tin text-white">Tin</span>
+    </a>
+    <button id="mobile-close-btn"
+            class="flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase text-zinc-400 hover:text-white transition-colors"
+            aria-label="Close menu">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+      Close
+    </button>
+  </div>
+
+  <!-- Nav links -->
+  <nav class="flex-1 flex flex-col justify-center px-6 py-8" aria-label="Mobile navigation">
+    <ul class="flex flex-col">
+      {% for item in site.data.settings.navigation.primary %}
+        {% assign acc_id = "mob-acc-" | append: forloop.index %}
+        {% unless forloop.last %}{% assign border_class = "border-b border-zinc-900" %}{% else %}{% assign border_class = "" %}{% endunless %}
+        {% if item.children and item.children.size > 0 %}
+        <li class="{{ border_class }}">
+          <button class="mob-acc-btn mob-fs-link py-4 flex items-center justify-between w-full text-left"
+                  data-target="{{ acc_id }}" aria-expanded="false" aria-controls="{{ acc_id }}">
+            {{ item.label }}
+            <svg class="mob-acc-chevron w-6 h-6 opacity-40 transition-transform flex-shrink-0"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <ul id="{{ acc_id }}" class="hidden pb-4 flex flex-col gap-1 pl-3 border-l-2 border-zinc-800" role="list">
+            {% for child in item.children %}
+            <li><a href="{{ child.path }}" class="mob-link flex items-center py-2.5 text-xl font-semibold text-zinc-100 hover:text-tin-red transition-colors">{{ child.label }}</a></li>
+            {% endfor %}
+          </ul>
+        </li>
+        {% elsif item.path contains "#megamenu-" %}
+          {% assign megaid = item.path | remove: "#megamenu-" %}
+          {% assign panel = site.data.settings.mega_menu[megaid] %}
+        <li class="{{ border_class }}">
+          <button class="mob-acc-btn mob-fs-link py-4 flex items-center justify-between w-full text-left"
+                  data-target="{{ acc_id }}" aria-expanded="false" aria-controls="{{ acc_id }}">
+            {{ item.label }}
+            <svg class="mob-acc-chevron w-6 h-6 opacity-40 transition-transform flex-shrink-0"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <ul id="{{ acc_id }}" class="hidden pb-4 flex flex-col gap-4 pl-3 border-l-2 border-zinc-800" role="list">
+            {% comment %} #601: mobile mega-menus were blank when mega_menu data is
+               unset (desktop has hardcoded fallbacks, mobile didn't). Mirror the
+               desktop fallback sections as tappable links. {% endcomment %}
+            {% if panel.columns and panel.columns.size > 0 %}
+            {% for col in panel.columns %}
+            <li>
+              {% if col.heading != "" %}<p class="text-[11px] font-bold tracking-widest uppercase text-tin-red mb-1">{{ col.heading }}</p>{% endif %}
+              {% if col.body != "" %}<p class="text-sm text-zinc-400 leading-relaxed mb-1.5">{{ col.body }}</p>{% endif %}
+              {% if col.link.label != "" %}<a href="{{ col.link.target }}" class="mob-link flex items-center py-2.5 text-xl font-semibold text-zinc-100 hover:text-tin-red transition-colors">{{ col.link.label }}</a>{% endif %}
+            </li>
+            {% endfor %}
+            {% elsif megaid == "about" %}
+            <li><a href="/about" class="mob-link flex items-center py-2.5 text-xl font-semibold text-zinc-100 hover:text-tin-red transition-colors">Who we are</a></li>
+            <li><a href="/#find-us" class="mob-link flex items-center py-2.5 text-xl font-semibold text-zinc-100 hover:text-tin-red transition-colors">Our venue</a></li>
+            <li><a href="/accessibility/" class="mob-link flex items-center py-2.5 text-xl font-semibold text-zinc-100 hover:text-tin-red transition-colors">Accessibility</a></li>
+            {% elsif megaid == "projects" %}
+            <li><a href="https://deliaphonic.gigkit.site" class="mob-link flex items-center py-2.5 text-xl font-semibold text-zinc-100 hover:text-tin-red transition-colors">Deliaphonic</a></li>
+            <li><a href="https://boudicafestival.co.uk" class="mob-link flex items-center py-2.5 text-xl font-semibold text-zinc-100 hover:text-tin-red transition-colors">Boudica Festival</a></li>
+            <li><a href="https://live-on-stage.gigkit.site" class="mob-link flex items-center py-2.5 text-xl font-semibold text-zinc-100 hover:text-tin-red transition-colors">Live on Stage</a></li>
+            {% elsif megaid == "space" %}
+            <li><a href="/venue-hire" class="mob-link flex items-center py-2.5 text-xl font-semibold text-zinc-100 hover:text-tin-red transition-colors">Venue Hire</a></li>
+            <li><a href="/rehearsal-rooms" class="mob-link flex items-center py-2.5 text-xl font-semibold text-zinc-100 hover:text-tin-red transition-colors">Rehearsal Rooms</a></li>
+            {% if site.data.settings.email %}<li><a href="mailto:{{ site.data.settings.email }}" class="mob-link flex items-center py-2.5 text-xl font-semibold text-zinc-100 hover:text-tin-red transition-colors">Get in Touch</a></li>{% endif %}
+            {% endif %}
+          </ul>
+        </li>
+        {% else %}
+        <li class="{{ border_class }}">
+          <a href="{{ item.path }}" class="mob-link mob-fs-link block py-4">{{ item.label }}</a>
+        </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </nav>
+
+  <!-- Footer -->
+  <div class="flex-shrink-0 px-6 py-5 border-t border-zinc-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div class="text-xs text-zinc-600 leading-relaxed">
+      {% if site.data.settings.address %}<p>{{ site.data.settings.address }}</p>{% endif %}
+      {% if site.data.settings.email %}<p><a href="mailto:{{ site.data.settings.email }}" class="hover:text-white transition-colors">{{ site.data.settings.email }}</a></p>{% endif %}
+    </div>
+    <a href="/support/" class="mob-link inline-block bg-tin-red text-white text-xs font-black px-6 py-3 hover:bg-[#c0474d] transition-colors tracking-widest uppercase">
+      Support Us
+    </a>
+  </div>
+</div>
+
+
+<!-- =====================================================================
+     PAGE CONTENT
+     ===================================================================== -->
+{{ content }}
+
+
+<!-- =====================================================================
+     FOOTER
+     ===================================================================== -->
+<footer class="bg-black border-t border-zinc-900">
+
+  <div id="newsletter" class="bg-zinc-900 py-10 px-4 sm:px-6">
+    <div class="max-w-screen-xl mx-auto flex flex-col sm:flex-row items-center gap-6">
+      <div class="flex-1">
+        <h3 class="text-xl font-black">{% if site.data.snippets.tin_newsletter_heading.body %}{{ site.data.snippets.tin_newsletter_heading.body }}{% else %}Stay in the Loop{% endif %}</h3>
+        <p class="text-sm text-zinc-400 mt-1">{% if site.data.snippets.tin_newsletter_blurb.body %}{{ site.data.snippets.tin_newsletter_blurb.body }}{% else %}Gig announcements, project news, and the occasional love letter.{% endif %}</p>
+      </div>
+      <div class="w-full sm:w-auto">
+        <form id="newsletter-form" action="/api/forms/newsletter" method="post" class="flex gap-2">
+          {% comment %} #746: honeypot — hidden from humans; filled only by bots, which are then silently dropped server-side {% endcomment %}
+          <span aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;height:0;width:0;overflow:hidden;">
+            <label>Leave this field blank<input type="text" name="hp_url" tabindex="-1" autocomplete="off" value=""></label>
+          </span>
+          <input type="email" name="email" required placeholder="your@email.com" class="flex-1 sm:w-64 bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-tin-yellow transition-colors" />
+          <input type="hidden" name="source" value="footer" />
+          <button type="submit" class="bg-tin-yellow text-black text-sm font-black px-5 py-2.5 rounded hover:bg-[#d4b040] transition-colors whitespace-nowrap">Subscribe</button>
+        </form>
+        <p id="newsletter-msg" class="text-xs text-zinc-500 mt-2 hidden"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="py-8 px-4 sm:px-6">
+    <div class="max-w-screen-xl mx-auto">
+
+      <div class="flex flex-col md:flex-row gap-8 mb-8">
+        <div class="flex-shrink-0">
+          <div class="flex flex-row items-center gap-1.5 leading-none mb-3">
+            <span class="tin-logo-the">The</span>
+            <span class="tin-logo-tin text-white">Tin</span>
+          </div>
+          <p class="text-xs text-zinc-500 max-w-[220px] leading-relaxed">
+            Registered Charity No. {{ site.data.settings.charity_number | default: "1152636" }}<br>
+            {{ site.data.settings.address }}
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 flex-1">
+          <div>
+            <h4 class="text-xs font-bold tracking-widest uppercase text-zinc-600 mb-3">Visit</h4>
+            <ul class="flex flex-col gap-2 text-sm text-zinc-400">
+              <li><a href="/events" class="hover:text-white">All Events</a></li>
+              <li><a href="/find-us/" class="hover:text-white">Find Us</a></li>
+              <li><a href="/accessibility/" class="hover:text-white">Accessibility</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold tracking-widest uppercase text-zinc-600 mb-3">Projects</h4>
+            <ul class="flex flex-col gap-2 text-sm text-zinc-400">
+              <li><a href="https://deliaphonic.gigkit.site" class="hover:text-delia-cyan">Deliaphonic</a></li>
+              <li><a href="https://boudicafestival.co.uk" class="hover:text-boudica">Boudica Festival</a></li>
+              <li><a href="https://live-on-stage.gigkit.site" class="hover:text-los">Live on Stage</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold tracking-widest uppercase text-zinc-600 mb-3">Hire</h4>
+            <ul class="flex flex-col gap-2 text-sm text-zinc-400">
+              <li><a href="/venue-hire" class="hover:text-white">Venue Hire</a></li>
+              <li><a href="/rehearsal-rooms" class="hover:text-white">Rehearsal Rooms</a></li>
+              <li><a href="mailto:{{ site.data.settings.email }}" class="hover:text-white">Get in Touch</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold tracking-widest uppercase text-zinc-600 mb-3">Support</h4>
+            <ul class="flex flex-col gap-2 text-sm text-zinc-400">
+              {% if site.data.settings.donate_url %}
+              <li><a href="{{ site.data.settings.donate_url }}" target="_blank" rel="noopener" class="hover:text-white">Donate</a></li>
+              {% else %}
+              <li><a href="/support/" class="hover:text-white">Donate</a></li>
+              {% endif %}
+              <li><a href="/volunteer/" class="hover:text-white">Volunteer</a></li>
+              <li><a href="/sponsor/" class="hover:text-white">Sponsor</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {% if site.data.settings.social %}
+      <div class="flex gap-4 mb-6">
+        {% if site.data.settings.social.instagram %}
+        <a href="{{ site.data.settings.social.instagram }}" target="_blank" rel="noopener" class="text-zinc-600 hover:text-white transition-colors text-xs">Instagram</a>
+        {% endif %}
+        {% if site.data.settings.social.facebook %}
+        <a href="{{ site.data.settings.social.facebook }}" target="_blank" rel="noopener" class="text-zinc-600 hover:text-white transition-colors text-xs">Facebook</a>
+        {% endif %}
+        {% if site.data.settings.social.twitter %}
+        <a href="{{ site.data.settings.social.twitter }}" target="_blank" rel="noopener" class="text-zinc-600 hover:text-white transition-colors text-xs">Twitter / X</a>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <div class="pt-6 border-t border-zinc-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-zinc-600">
+        <p>&copy; {{ site.time | date: "%Y" }} {{ site.data.settings.name }}. Registered Charity No. {{ site.data.settings.charity_number | default: "1152636" }}.</p>
+        <div class="flex gap-4">
+          <a href="/privacy" class="hover:text-white">Privacy</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</footer>
+
+
+<script>
+  // =====================================================================
+  // NAV — Mega menus + Mobile menu
+  // =====================================================================
+  (function () {
+    var openId      = null;
+    var backdrop    = document.getElementById('nav-backdrop');
+    var mobileMenu  = document.getElementById('mobile-menu');
+    var mobileOpen  = document.getElementById('mobile-open-btn');
+    var mobileClose = document.getElementById('mobile-close-btn');
+
+    function getPanel(id) { return document.getElementById('megamenu-' + id); }
+    function getBtn(id)   { return document.querySelector('[data-megamenu="' + id + '"]'); }
+
+    function allFocusable(container) {
+      return Array.from(container.querySelectorAll(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )).filter(function (el) { return el.offsetParent !== null; });
+    }
+
+    function openMega(id) {
+      if (openId === id) { closeMega(); return; }
+      closeMega();
+      var panel = getPanel(id);
+      var btn   = getBtn(id);
+      if (!panel || !btn) return;
+      openId = id;
+      panel.classList.remove('hidden');
+      panel.classList.add('mega-panel-open');
+      btn.setAttribute('aria-expanded', 'true');
+      backdrop.classList.remove('hidden');
+      var first = allFocusable(panel)[0];
+      if (first) first.focus();
+    }
+
+    function closeMega() {
+      if (!openId) return;
+      var panel = getPanel(openId);
+      var btn   = getBtn(openId);
+      if (panel) { panel.classList.add('hidden'); panel.classList.remove('mega-panel-open'); }
+      if (btn)   { btn.setAttribute('aria-expanded', 'false'); }
+      backdrop.classList.add('hidden');
+      openId = null;
+    }
+
+    document.querySelectorAll('[data-megamenu]').forEach(function (btn) {
+      btn.addEventListener('click', function () { openMega(btn.getAttribute('data-megamenu')); });
+    });
+    backdrop.addEventListener('click', closeMega);
+
+    document.querySelectorAll('.mega-panel').forEach(function (panel) {
+      panel.addEventListener('keydown', function (e) {
+        if (e.key !== 'Tab') return;
+        var focusables = allFocusable(panel);
+        var last  = focusables[focusables.length - 1];
+        var first = focusables[0];
+        if (!e.shiftKey && document.activeElement === last)  { closeMega(); }
+        if (e.shiftKey  && document.activeElement === first) { closeMega(); }
+      });
+    });
+
+    function openMobile() {
+      mobileMenu.classList.add('mob-open');
+      mobileMenu.setAttribute('aria-hidden', 'false');
+      mobileOpen.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+      mobileClose.focus();
+    }
+
+    function closeMobile() {
+      mobileMenu.classList.remove('mob-open');
+      mobileMenu.setAttribute('aria-hidden', 'true');
+      mobileOpen.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+      mobileOpen.focus();
+    }
+
+    mobileOpen.addEventListener('click', openMobile);
+    mobileClose.addEventListener('click', closeMobile);
+    mobileMenu.querySelectorAll('.mob-link').forEach(function (el) {
+      el.addEventListener('click', closeMobile);
+    });
+
+    mobileMenu.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      var focusables = allFocusable(mobileMenu);
+      var first = focusables[0];
+      var last  = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+
+    document.querySelectorAll('.mob-acc-btn').forEach(function (btn) {
+      var list = document.getElementById(btn.getAttribute('data-target'));
+      if (!list) return;
+      btn.addEventListener('click', function () {
+        var expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!expanded));
+        list.classList.toggle('hidden');
+        var chevron = btn.querySelector('.mob-acc-chevron');
+        if (chevron) chevron.style.transform = expanded ? '' : 'rotate(180deg)';
+      });
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      if (openId) { var trigger = getBtn(openId); closeMega(); if (trigger) trigger.focus(); }
+      if (mobileMenu.getAttribute('aria-hidden') === 'false') { closeMobile(); }
+    });
+  }());
+
+  // =====================================================================
+  // NEWSLETTER FORM
+  // =====================================================================
+  (function () {
+    var form = document.getElementById('newsletter-form');
+    var msg  = document.getElementById('newsletter-msg');
+    if (!form || !window.fetch) return;
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      fetch('/api/forms/newsletter', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: new FormData(form)
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (json) {
+        msg.textContent = json.message || json.error || 'Done.';
+        msg.className = 'text-xs mt-2 ' + (json.ok ? 'text-emerald-400' : 'text-red-400');
+        msg.classList.remove('hidden');
+        if (json.ok) form.reset();
+      })
+      .catch(function () {
+        msg.textContent = 'Something went wrong - please try again.';
+        msg.className = 'text-xs mt-2 text-red-400';
+        msg.classList.remove('hidden');
+      });
+    });
+  }());
+
+  // =====================================================================
+  // HERO CAROUSEL
+  // =====================================================================
+  var slides = document.querySelectorAll('.hero-slide');
+  var dots   = document.querySelectorAll('.hero-dot');
+  if (slides.length > 1) {
+    var current = 0;
+    var timer;
+
+    function goSlide(n) {
+      slides[current].classList.remove('active');
+      if (dots[current]) { dots[current].classList.remove('bg-white'); dots[current].classList.add('bg-white/30'); }
+      current = (n + slides.length) % slides.length;
+      slides[current].classList.add('active');
+      if (dots[current]) { dots[current].classList.remove('bg-white/30'); dots[current].classList.add('bg-white'); }
+      resetTimer();
+    }
+
+    function nextSlide() { goSlide(current + 1); }
+    function prevSlide() { goSlide(current - 1); }
+    function resetTimer() { clearInterval(timer); timer = setInterval(function () { goSlide(current + 1); }, 5000); }
+
+    var prevBtn = document.getElementById('hero-prev');
+    var nextBtn = document.getElementById('hero-next');
+    if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+    if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+    document.querySelectorAll('.hero-dot').forEach(function (dot, i) {
+      dot.addEventListener('click', function () { goSlide(i); });
+    });
+
+    resetTimer();
+  } else if (slides.length === 1) {
+    slides[0].classList.add('active');
+  }
+</script>
+
+</body>
+</html>

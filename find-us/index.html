@@ -1,0 +1,93 @@
+---
+layout: default
+title: Find Us - The Tin Music and Arts
+permalink: /find-us/
+---
+<div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-14">
+  <p class="text-xs tracking-widest uppercase text-tin-red mb-2">Getting here</p>
+  <h1 class="text-4xl font-black tracking-tight mb-8">Find Us</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+
+    <div class="space-y-6">
+      {% if site.data.settings.address %}
+      <div>
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-2">Address</h2>
+        <p class="text-zinc-200 leading-relaxed">{{ site.data.settings.address | newline_to_br }}</p>
+      </div>
+      {% endif %}
+
+      {% if site.data.settings.phone %}
+      <div>
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-2">Phone</h2>
+        <p class="text-zinc-200"><a href="tel:{{ site.data.settings.phone }}" class="hover:text-tin-red transition-colors">{{ site.data.settings.phone }}</a></p>
+      </div>
+      {% endif %}
+
+      {% if site.data.settings.email %}
+      <div>
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-2">Email</h2>
+        <p class="text-zinc-200"><a href="mailto:{{ site.data.settings.email }}" class="hover:text-tin-red transition-colors">{{ site.data.settings.email }}</a></p>
+      </div>
+      {% endif %}
+
+      {% if site.data.settings.latitude and site.data.settings.longitude %}
+      <a href="https://maps.google.com/?q={{ site.data.settings.latitude }},{{ site.data.settings.longitude }}" target="_blank" rel="noopener"
+         class="inline-block bg-tin-red text-white text-sm font-bold px-6 py-2.5 rounded hover:bg-[#c0474d] transition-colors">
+        Open in Google Maps
+      </a>
+      {% endif %}
+
+      {% comment %} #613: what3words — venue + office entrances. Real values as
+         fallbacks; overridable via the tin_find_us_what3words / _office snippets. {% endcomment %}
+      {% assign w3w_venue = site.data.snippets.tin_find_us_what3words.body | default: "cult.gosh.clown" | strip | remove: "///" %}
+      {% assign w3w_office = site.data.snippets.tin_find_us_office_what3words.body | default: "wizard.will.spoon" | strip | remove: "///" %}
+      <div>
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-2">what3words</h2>
+        <div class="space-y-1.5">
+          <p class="flex items-baseline gap-2">
+            <span class="text-xs text-zinc-500 w-28 flex-shrink-0">Venue</span>
+            <a href="https://what3words.com/{{ w3w_venue }}" target="_blank" rel="noopener" class="text-zinc-200 hover:text-tin-red transition-colors font-mono">///{{ w3w_venue }}</a>
+          </p>
+          <p class="flex items-baseline gap-2">
+            <span class="text-xs text-zinc-500 w-28 flex-shrink-0">Office entrance</span>
+            <a href="https://what3words.com/{{ w3w_office }}" target="_blank" rel="noopener" class="text-zinc-200 hover:text-tin-red transition-colors font-mono">///{{ w3w_office }}</a>
+          </p>
+        </div>
+        <p class="text-xs text-zinc-500 mt-1">Tap for the exact entrance in three words.</p>
+      </div>
+
+      <div class="pt-4 border-t border-zinc-800">
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-3">Getting here</h2>
+        <ul class="space-y-2 text-sm text-zinc-400">
+          <li><strong class="text-zinc-300">By foot</strong> - {% if site.data.snippets.tin_find_us_foot.body %}{{ site.data.snippets.tin_find_us_foot.body }}{% else %}10 minutes from Coventry city centre via the canal towpath.{% endif %}</li>
+          <li><strong class="text-zinc-300">By bus</strong> - {% if site.data.snippets.tin_find_us_bus.body %}{{ site.data.snippets.tin_find_us_bus.body }}{% else %}Various routes stop on Ring Road. Follow signs to the Canal Basin.{% endif %}</li>
+          <li><strong class="text-zinc-300">By train</strong> - {% if site.data.snippets.tin_find_us_train.body %}{{ site.data.snippets.tin_find_us_train.body }}{% else %}Coventry station is about 15 minutes on foot.{% endif %}</li>
+          <li><strong class="text-zinc-300">Parking</strong> - {% if site.data.snippets.tin_find_us_parking.body %}{{ site.data.snippets.tin_find_us_parking.body }}{% else %}Pay and display on the Canal Basin approach road, with additional city-centre car parks a short walk away.{% endif %}</li>
+        </ul>
+      </div>
+    </div>
+
+    {% if site.data.settings.latitude and site.data.settings.longitude %}
+    <div class="rounded overflow-hidden border border-zinc-800 h-80 md:h-auto">
+      <iframe
+        src="https://maps.google.com/maps?q={{ site.data.settings.latitude }},{{ site.data.settings.longitude }}&z=15&output=embed"
+        width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="The Tin location map">
+      </iframe>
+    </div>
+    {% endif %}
+
+  </div>
+
+  {% comment %} #612: hire CTA by the location info — venue / rehearsal / community space {% endcomment %}
+  <div class="mt-10 pt-8 border-t border-zinc-800">
+    <p class="text-sm text-zinc-400 max-w-lg">Thinking of hiring the space? The Coal Vaults is available for gigs, rehearsals, community events and private hire.</p>
+    <div class="flex flex-wrap gap-3 mt-4">
+      <a href="/venue-hire/" class="text-sm font-bold text-white border border-zinc-600 px-5 py-2.5 rounded hover:border-white transition-colors">Venue hire</a>
+      <a href="/rehearsal-rooms/" class="text-sm font-bold text-white border border-zinc-600 px-5 py-2.5 rounded hover:border-white transition-colors">Rehearsal rooms</a>
+      <a href="/community-space/" class="text-sm font-bold text-white border border-zinc-600 px-5 py-2.5 rounded hover:border-white transition-colors">Community space</a>
+    </div>
+  </div>
+</div>

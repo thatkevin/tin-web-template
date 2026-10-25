@@ -1,0 +1,137 @@
+---
+layout: default
+title: Live on Stage - A Tin Music and Arts Project
+---
+
+{% assign programme = site.data.programmes | where: "slug", "live-on-stage" | first %}
+
+<!-- Breadcrumb stripe -->
+<div class="border-t-2 border-los bg-zinc-950 px-4 sm:px-6 py-2">
+  <div class="max-w-screen-xl mx-auto text-xs text-zinc-500 flex items-center gap-2">
+    <a href="/" class="hover:text-white">The Tin</a>
+    <span>/</span>
+    <span>/</span>
+    <span class="text-los font-semibold">Live on Stage</span>
+  </div>
+</div>
+
+<!-- Hero -->
+<section class="bg-black py-20 px-4 sm:px-6">
+  <div class="max-w-screen-xl mx-auto">
+    <div class="flex items-center gap-3 mb-6">
+      <span class="w-2 h-2 rounded-full bg-los"></span>
+      <span class="text-xs tracking-widest uppercase text-los">A Tin Music and Arts Project</span>
+    </div>
+    <h1 class="text-6xl sm:text-8xl font-black tracking-tight leading-none mb-6 text-los">
+      Live on Stage
+    </h1>
+    <p class="text-xl text-zinc-300 max-w-2xl leading-relaxed mb-8">
+      {% if programme and programme.description %}{{ programme.description }}{% else %}Young musicians form bands, write songs, and perform live. For instrumentalists aged 11–18 at Grade 4 and above.{% endif %}
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="#programme" class="bg-los text-white text-sm font-black px-6 py-3 rounded hover:opacity-90 transition-opacity">Upcoming sessions</a>
+      <a href="/#support" class="border border-los text-los text-sm font-bold px-6 py-3 rounded hover:bg-los hover:text-white transition-colors">Support Live on Stage</a>
+    </div>
+  </div>
+</section>
+
+<div class="h-0.5 bg-gradient-to-r from-los to-transparent"></div>
+
+<!-- About -->
+<section class="py-16 px-4 sm:px-6 bg-zinc-950">
+  <div class="max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+    <div>
+      <p class="text-xs tracking-widest uppercase text-los mb-4">The programme</p>
+      <h2 class="text-3xl font-black tracking-tight mb-6">Making musicians</h2>
+      <p class="text-sm text-zinc-400 leading-relaxed mb-4">Live on Stage is The Tin's youth music programme for instrumentalists aged 11–18 at Grade 4 and above. Young musicians are brought together to form bands, collaborate on original songs, and perform live.</p>
+      <p class="text-sm text-zinc-400 leading-relaxed mb-4">Sessions run on Monday evenings at the Coal Vaults. At the end of each term, bands perform a showcase concert on the Tin's stage - often for the first time.</p>
+      <p class="text-sm text-zinc-400 leading-relaxed">The programme costs £80 per term - deliberately kept low because we believe access to music shouldn't depend on your family's income.</p>
+    </div>
+    <div class="flex flex-col gap-4">
+      <div class="bg-zinc-900 rounded-xl p-6">
+        <h3 class="text-sm font-bold text-los mb-3">Who it's for</h3>
+        <ul class="flex flex-col gap-2 text-sm text-zinc-400">
+          <li class="flex items-start gap-2"><span class="text-los mt-0.5">→</span> Instrumentalists aged 11–18</li>
+          <li class="flex items-start gap-2"><span class="text-los mt-0.5">→</span> Grade 4 or above on your instrument</li>
+          <li class="flex items-start gap-2"><span class="text-los mt-0.5">→</span> Any instrument welcome</li>
+          <li class="flex items-start gap-2"><span class="text-los mt-0.5">→</span> All genres - rock, pop, folk, jazz, more</li>
+        </ul>
+      </div>
+      <div class="bg-zinc-900 rounded-xl p-6">
+        <h3 class="text-sm font-bold text-los mb-3">Practicalities</h3>
+        <ul class="flex flex-col gap-2 text-sm text-zinc-400">
+          <li class="flex items-start gap-2"><span class="text-los mt-0.5">→</span> Mondays, The Coal Vaults</li>
+          <li class="flex items-start gap-2"><span class="text-los mt-0.5">→</span> £80 per term</li>
+          <li class="flex items-start gap-2"><span class="text-los mt-0.5">→</span> Bursaries available - ask us</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Upcoming sessions -->
+<section id="programme" class="py-16 px-4 sm:px-6 bg-black border-t border-zinc-900">
+  <div class="max-w-screen-xl mx-auto">
+    <p class="text-xs tracking-widest uppercase text-los mb-2">Upcoming</p>
+    <h2 class="text-3xl font-black tracking-tight mb-10">Sessions &amp; showcases</h2>
+
+    {% if programme %}
+      {% assign prog_events = programme.events %}
+      {% if prog_events.size > 0 %}
+      <div class="flex flex-col divide-y divide-zinc-900">
+        {% for event_ref in prog_events %}
+          {% assign event = site.data.upcoming_events | where: "slug", event_ref.slug | first %}
+          {% unless event %}{% assign event = site.data.previous_events | where: "slug", event_ref.slug | first %}{% endunless %}
+          <div class="py-5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 group hover:bg-zinc-950 px-2 -mx-2 rounded transition-colors">
+            <span class="text-sm font-bold text-los min-w-[160px]">{{ event_ref.start_date | date: "%-d %b %Y" }}</span>
+            <span class="text-base font-semibold text-white flex-1">
+              {% if event %}
+                <a href="{% if event.ticket_url %}{{ event.ticket_url }}{% else %}/events/{{ event.slug }}/{% endif %}"
+                   {% if event.ticket_url %}target="_blank" rel="noopener"{% endif %}
+                   class="hover:text-los transition-colors">{{ event_ref.name }}</a>
+              {% else %}
+                {{ event_ref.name }}
+              {% endif %}
+            </span>
+            {% if event %}
+            <span class="text-sm font-bold text-los">
+              {% if event.free_entry %}Free{% elsif event.ticket_url %}Tickets{% endif %}
+            </span>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-zinc-500 text-sm">Next term's sessions will be announced soon.</p>
+      {% endif %}
+    {% else %}
+    <p class="text-zinc-500 text-sm">Session information coming soon.</p>
+    {% endif %}
+
+    <div class="mt-10 p-6 bg-zinc-900 rounded flex flex-col sm:flex-row sm:items-center gap-4">
+      <div class="flex-1">
+        <p class="text-sm font-bold text-white mb-1">Interested in joining?</p>
+        {% if site.data.settings.email %}
+        <p class="text-sm text-zinc-400">Drop us an email at <a href="mailto:{{ site.data.settings.email }}" class="text-los hover:underline">{{ site.data.settings.email }}</a> to find out when applications open for the next term.</p>
+        {% else %}
+        <p class="text-sm text-zinc-400">Get in touch to find out when applications open for the next term.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Loop back -->
+<section class="py-16 px-4 sm:px-6 bg-zinc-900 border-t border-zinc-800">
+  <div class="max-w-screen-xl mx-auto flex flex-col md:flex-row gap-8 items-center">
+    <div class="flex-1">
+      <p class="text-xs tracking-widest uppercase text-tin-yellow mb-2">This is The Tin's work</p>
+      <h2 class="text-2xl font-black tracking-tight mb-3">Live on Stage is only possible because of your support</h2>
+      <p class="text-sm text-zinc-400 leading-relaxed max-w-xl">As a registered charity, The Tin relies on donations, grants, and fundraising to keep Live on Stage running and affordable. Every donation helps keep the programme accessible to young musicians from all backgrounds.</p>
+    </div>
+    <div class="flex flex-col gap-3 flex-shrink-0">
+      <a href="/#support" class="bg-tin-red text-white text-sm font-black px-8 py-3 rounded hover:bg-[#c0474d] transition-colors text-center">Donate to The Tin</a>
+      <a href="/#newsletter" class="border border-zinc-600 text-zinc-300 text-sm font-semibold px-8 py-3 rounded hover:border-white hover:text-white transition-colors text-center">Stay in the Loop</a>
+    </div>
+  </div>
+</section>

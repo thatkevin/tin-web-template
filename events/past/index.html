@@ -1,0 +1,43 @@
+---
+layout: default
+title: Past Events
+permalink: /events/past/
+description: A look back at gigs, festivals and shows that have taken place at The Tin Music and Arts in Coventry.
+---
+
+<div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-12">
+
+  <a href="/events" class="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-white transition-colors mb-6 uppercase tracking-widest">
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+    What's On
+  </a>
+
+  <div class="mb-10">
+    <p class="text-xs tracking-widest uppercase text-zinc-500 mb-1">Looking back</p>
+    <h1 class="text-4xl font-black tracking-tight">Past Events</h1>
+  </div>
+
+  {% if site.data.previous_events.size > 0 %}
+  <div class="flex flex-col divide-y divide-zinc-900">
+    {% for event in site.data.previous_events %}
+    <div class="py-4 flex items-center justify-between gap-4">
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-bold text-zinc-300 truncate">{{ event.name }}</p>
+        {% if event.lineup.size > 0 %}
+        <p class="text-xs text-zinc-600 truncate">
+          {% for entry in event.lineup limit: 3 %}{{ entry.name }}{% unless forloop.last %}, {% endunless %}{% endfor %}
+        </p>
+        {% endif %}
+      </div>
+      <p class="text-xs text-zinc-600 flex-shrink-0">{{ event.start_date | date: "%-d %b %Y" }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="bg-zinc-900 rounded-xl p-16 text-center">
+    <p class="text-zinc-500 text-sm mb-2">No past events to show yet.</p>
+    <p class="text-xs text-zinc-600">See <a href="/events" class="text-tin-yellow hover:underline">what's coming up</a>.</p>
+  </div>
+  {% endif %}
+
+</div>

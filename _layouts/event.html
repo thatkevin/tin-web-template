@@ -1,0 +1,191 @@
+---
+layout: default
+---
+<div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
+
+  <a href="/events" class="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-white transition-colors mb-6 uppercase tracking-widest">
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+    All Events
+  </a>
+
+  {% if page.image %}
+  <div class="relative w-full overflow-hidden bg-zinc-900 mb-8" style="aspect-ratio:21/9">
+    <img src="{{ page.image.medium }}" alt="{{ page.title }}"
+         class="absolute inset-0 w-full h-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent"></div>
+  </div>
+  {% endif %}
+
+  <div class="lg:grid lg:gap-12" style="grid-template-columns:1fr 300px">
+
+    <div>
+
+      {% if page.genres and page.genres.size > 0 %}
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mb-4">
+        {% for genre in page.genres %}
+        <span class="text-[10px] font-bold tracking-widest uppercase text-tin-red">{{ genre }}</span>
+        {% unless forloop.last %}<span class="text-zinc-700" aria-hidden="true">·</span>{% endunless %}
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight mb-5">{{ page.title }}</h1>
+
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-1.5 mb-8 text-sm font-semibold text-zinc-400">
+        {% if page.start_date %}<span>{{ page.start_date | date: "%-d %B %Y" }}</span>{% endif %}
+        {% if page.doors_time %}<span class="text-zinc-700" aria-hidden="true">·</span><span>Doors {{ page.doors_time }}</span>{% endif %}
+        {% if page.start_time %}<span class="text-zinc-700" aria-hidden="true">·</span><span>Starts {{ page.start_time }}</span>{% endif %}
+        {% if page.locations and page.locations.size > 0 %}
+        <span class="text-zinc-700" aria-hidden="true">·</span>
+        <span>{% for loc in page.locations %}{% if loc.room %}{{ loc.room }}, {% endif %}{{ loc.name }}{% unless forloop.last %} &amp; {% endunless %}{% endfor %}</span>
+        {% endif %}
+      </div>
+
+      {% if content and content != '' %}
+      <div class="prose prose-invert prose-sm sm:prose-base max-w-none mb-10
+                  prose-headings:font-black prose-headings:text-white
+                  prose-a:text-tin-yellow prose-a:no-underline hover:prose-a:underline
+                  prose-strong:text-white prose-li:text-zinc-300 prose-p:text-zinc-300">
+        {{ content }}
+      </div>
+      {% elsif page.short_description %}
+      <p class="text-zinc-300 text-base leading-relaxed mb-10">{{ page.short_description }}</p>
+      {% endif %}
+
+      {% comment %} #614: YouTube / SoundCloud embed when a media link is set {% endcomment %}
+      {% if page.media_embed_src %}
+      <div class="mb-10">
+        <h2 class="text-[10px] font-bold tracking-widest uppercase text-zinc-600 mb-4">{% if page.media_provider == 'soundcloud' %}Listen{% else %}Watch{% endif %}</h2>
+        {% if page.media_provider == 'soundcloud' %}
+        <iframe class="w-full border-0 rounded-lg" height="166" scrolling="no" allow="autoplay"
+                src="{{ page.media_embed_src }}" title="Listen — {{ page.title }}"></iframe>
+        {% else %}
+        <div class="relative w-full overflow-hidden rounded-lg bg-zinc-900" style="aspect-ratio:16/9">
+          <iframe class="absolute inset-0 w-full h-full border-0" src="{{ page.media_embed_src }}"
+                  title="Watch — {{ page.title }}"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% if page.lineup and page.lineup.size > 0 %}
+      <div class="mb-10">
+        <h2 class="text-[10px] font-bold tracking-widest uppercase text-zinc-600 mb-5">Line-up</h2>
+        <div class="flex flex-col gap-2">
+          {% for artist in page.lineup %}
+          <a href="/artists/{{ artist.slug }}/"
+             class="group flex items-center gap-4 bg-zinc-900 hover:bg-zinc-800 p-3 rounded transition-colors">
+            {% if artist.photo %}
+            <img src="{{ artist.photo.square }}" alt="{{ artist.name }}"
+                 class="w-14 h-14 rounded-full object-cover flex-shrink-0 ring-2 ring-zinc-700 group-hover:ring-tin-red transition-all">
+            {% else %}
+            <div class="w-14 h-14 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+              <svg class="w-6 h-6 text-zinc-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+            </div>
+            {% endif %}
+            <div class="flex-1 min-w-0">
+              <p class="font-bold text-white text-sm group-hover:text-tin-red transition-colors">{{ artist.name }}</p>
+              {% if artist.role and artist.role != '' %}
+              <p class="text-xs text-zinc-500 uppercase tracking-wider mt-0.5">{{ artist.role }}</p>
+              {% endif %}
+            </div>
+            {% if artist.set_time %}
+            <span class="text-xs font-bold text-zinc-600 flex-shrink-0">{{ artist.set_time }}</span>
+            {% endif %}
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if page.promoters and page.promoters.size > 0 %}
+      <p class="text-xs text-zinc-600">
+        Presented by
+        {% for p in page.promoters %}
+        <a href="/promoters/{{ p.slug }}/" class="text-zinc-400 hover:text-white transition-colors font-semibold">{{ p.name }}</a>{% unless forloop.last %}, {% endunless %}
+        {% endfor %}
+      </p>
+      {% endif %}
+
+    </div>
+
+    <aside class="mt-8 lg:mt-0">
+      <div class="bg-zinc-900 rounded-lg p-6 sticky top-24">
+
+        {% if page.free_entry %}
+        <p class="text-2xl font-black text-white mb-1">Free Entry</p>
+        {% elsif page.ticket_price_display %}
+        <p class="text-2xl font-black text-white mb-1">{{ page.ticket_price_display }}</p>
+        {% endif %}
+
+        {% if page.age_restriction %}
+        <p class="text-xs text-zinc-500 mb-4 uppercase tracking-wider">{{ page.age_restriction }}</p>
+        {% endif %}
+
+        {% if page.ticket_widget_code or page.ticket_url contains "humanitix.com" %}
+          <a href="#tickets"
+             class="block w-full text-center bg-tin-red text-white font-black text-sm px-6 py-3 rounded hover:bg-[#c0474d] transition-colors mb-2">
+            Get Tickets
+          </a>
+        {% elsif page.ticket_url %}
+          <a href="{{ page.ticket_url }}" target="_blank" rel="noopener"
+             class="block w-full text-center bg-tin-red text-white font-black text-sm px-6 py-3 rounded hover:bg-[#c0474d] transition-colors mb-2">
+            Get Tickets ↗
+          </a>
+        {% elsif page.ticket_info %}
+        <p class="text-sm text-zinc-400 leading-relaxed mb-2">{{ page.ticket_info | escape | newline_to_br }}</p>
+        {% elsif page.free_entry %}
+        <p class="text-sm text-zinc-400 leading-relaxed mb-2">No ticket needed - just show up.</p>
+        {% endif %}
+
+        <div class="mt-5 pt-5 border-t border-zinc-800 flex flex-col gap-4 text-sm text-zinc-400">
+          {% if page.start_date %}
+          <div class="flex items-start gap-3">
+            <svg class="w-4 h-4 text-zinc-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <div>
+              <p class="font-semibold text-white">{{ page.start_date | date: "%-d %B %Y" }}</p>
+              {% if page.doors_time %}<p class="text-xs text-zinc-500 mt-0.5">Doors {{ page.doors_time }}{% if page.start_time %} · Starts {{ page.start_time }}{% endif %}</p>{% endif %}
+            </div>
+          </div>
+          {% endif %}
+          {% if page.locations and page.locations.size > 0 %}
+          <div class="flex items-start gap-3">
+            <svg class="w-4 h-4 text-zinc-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <div>
+              {% for loc in page.locations %}
+              <p class="font-semibold text-white">{% if loc.room %}{{ loc.room }}, {% endif %}{{ loc.name }}</p>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </aside>
+
+  </div>
+
+  {% comment %} #599: make the ticket embed tall (fills the viewport) so it flows
+     with the page instead of nested-scrolling inside a short fixed iframe. {% endcomment %}
+  {% if page.ticket_widget_code %}
+  <div id="tickets" class="mt-12 pt-10 border-t border-zinc-800">
+    <h2 class="text-[10px] font-bold tracking-widest uppercase text-zinc-600 mb-6">Buy Tickets</h2>
+    <div class="[&_iframe]:w-full [&_iframe]:h-[90vh] [&_iframe]:min-h-[900px] [&_iframe]:border-0">{{ page.ticket_widget_code }}</div>
+  </div>
+  {% elsif page.ticket_url contains "humanitix.com" %}
+  {% assign _hu = page.ticket_url %}
+  {% unless _hu contains "/tickets" %}{% assign _hu = _hu | append: "/tickets" %}{% endunless %}
+  {% if _hu contains "?" %}{% assign _hu_src = _hu | append: "&widget=true" %}{% else %}{% assign _hu_src = _hu | append: "?widget=true" %}{% endif %}
+  <div id="tickets" class="mt-12 pt-10 border-t border-zinc-800">
+    <h2 class="text-[10px] font-bold tracking-widest uppercase text-zinc-600 mb-6">Buy Tickets</h2>
+    <iframe src="{{ _hu_src }}"
+            class="w-full h-[90vh] min-h-[900px] border-0"
+            scrolling="auto"
+            allow="payment"
+            title="Buy tickets for {{ page.title }}"></iframe>
+  </div>
+  {% endif %}
+
+</div>

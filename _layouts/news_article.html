@@ -1,0 +1,36 @@
+---
+layout: default
+---
+<article class="max-w-3xl mx-auto px-4 sm:px-6 py-14">
+
+  <header class="mb-10">
+    {% if page.category %}
+    <p class="text-xs tracking-widest uppercase text-tin-yellow mb-3">{{ page.category }}</p>
+    {% endif %}
+    <h1 class="text-4xl font-black tracking-tight leading-tight mb-4">{{ page.title }}</h1>
+    {% if page.pull_quote %}
+    <p class="text-lg text-zinc-400 leading-relaxed mb-5">{{ page.pull_quote }}</p>
+    {% endif %}
+    {% if page.published_at %}
+    <p class="text-sm text-zinc-500">{{ page.published_at | date: "%-d %B %Y" }}</p>
+    {% endif %}
+  </header>
+
+  {% if page.cover_image %}
+  <div class="mb-10 -mx-4 sm:-mx-6">
+    <img src="{{ page.cover_image.medium }}" alt="{{ page.title }}" class="w-full max-h-[480px] object-cover">
+  </div>
+  {% endif %}
+
+  <div class="prose prose-invert prose-zinc max-w-none
+              prose-headings:font-black prose-headings:tracking-tight
+              prose-a:text-tin-yellow prose-a:no-underline hover:prose-a:underline
+              prose-img:rounded-lg prose-img:w-full">
+    {{ content }}
+  </div>
+
+  <div class="mt-12 pt-8 border-t border-zinc-800">
+    <a href="/news/" class="text-sm font-semibold text-zinc-400 hover:text-white transition-colors">All news</a>
+  </div>
+
+</article>

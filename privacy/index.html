@@ -1,0 +1,55 @@
+---
+layout: default
+title: Privacy Policy - The Tin Music and Arts
+permalink: /privacy/
+---
+<div class="max-w-screen-md mx-auto px-4 sm:px-6 py-14">
+  <p class="text-xs tracking-widest uppercase text-tin-red mb-2">Legal</p>
+  <h1 class="text-4xl font-black tracking-tight mb-8">Privacy Policy</h1>
+
+  {% assign page_record = site.pages | where: "slug", "privacy" | first %}
+  {% if page_record %}
+    <div class="prose prose-invert prose-sm max-w-none text-zinc-300 leading-relaxed">
+      {{ page_record.content }}
+    </div>
+  {% else %}
+  <div class="space-y-8 text-sm text-zinc-300 leading-relaxed">
+
+    <section>
+      <h2 class="text-lg font-black text-white mb-3">We don't use cookies</h2>
+      <p>The Tin Music and Arts website does not use cookies to track you. We do not use advertising networks, retargeting pixels, or third-party tracking of any kind. You will not find a cookie consent banner here because there is nothing to consent to.</p>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-black text-white mb-3">What we collect and why</h2>
+      <p class="mb-3">We collect minimal data, only what's needed to run the website:</p>
+      <ul class="list-disc pl-5 space-y-2">
+        <li><strong class="text-white">Contact form submissions</strong> - name, email address, and your message. We use this to respond to your enquiry. We don't add you to any mailing list without your explicit consent.</li>
+        <li><strong class="text-white">Newsletter sign-ups</strong> - your email address, if you choose to sign up. You can unsubscribe at any time using the link in any email we send.</li>
+        <li><strong class="text-white">Server logs</strong> - our web host automatically records IP addresses and page requests for security purposes. These are not shared with anyone and are deleted periodically.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-black text-white mb-3">Third parties</h2>
+      <p>We use the following third-party services:</p>
+      <ul class="list-disc pl-5 space-y-2 mt-3">
+        <li><strong class="text-white">Google Maps</strong> - the map on our Find Us page is embedded from Google. Google's own privacy policy applies to any data they collect.</li>
+        <li><strong class="text-white">Ticket providers</strong> - if you click through to buy tickets, you are visiting a third-party site. Their privacy policy applies.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-black text-white mb-3">Your rights</h2>
+      <p>You have the right to ask us what personal data we hold about you, to request its deletion, or to correct it. Email us at {% if site.data.settings.email %}<a href="mailto:{{ site.data.settings.email }}" class="text-white underline underline-offset-2">{{ site.data.settings.email }}</a>{% else %}the address on our Contact page{% endif %} and we'll respond promptly.</p>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-black text-white mb-3">Contact</h2>
+      <p>The Tin Music and Arts is a registered charity (no. {{ site.data.settings.charity_number | default: "1152636" }}). For privacy questions, contact us at {% if site.data.settings.email %}<a href="mailto:{{ site.data.settings.email }}" class="text-white underline underline-offset-2">{{ site.data.settings.email }}</a>{% else %}/contact{% endif %}.</p>
+    </section>
+
+    <p class="text-xs text-zinc-600 pt-4 border-t border-zinc-800">Last updated: {% if site.data.snippets.tin_privacy_last_updated.body %}{{ site.data.snippets.tin_privacy_last_updated.body }}{% else %}May 2026{% endif %}</p>
+  </div>
+  {% endif %}
+</div>

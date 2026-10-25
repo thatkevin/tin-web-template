@@ -1,0 +1,8 @@
+title: The Tin Music and Arts
+collections:
+  pages:
+    output: true
+    permalink: /:slug/
+  news:
+    output: true
+    permalink: /news/:slug/

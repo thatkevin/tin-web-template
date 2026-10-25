@@ -1,0 +1,66 @@
+---
+layout: default
+---
+{% assign group = site.data.page_groups[page.parent_slug] %}
+{% assign has_subnav = false %}
+{% if group and group.children.size > 0 %}{% assign has_subnav = true %}{% endif %}
+
+<div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-12 {% if has_subnav %}lg:grid lg:grid-cols-[220px_1fr] lg:gap-12{% endif %}">
+
+  {% if has_subnav %}
+  <aside class="hidden lg:block">
+    <nav aria-label="Section navigation">
+      <a href="{{ group.url }}" class="block text-[10px] font-bold tracking-widest uppercase text-zinc-600 mb-3 hover:text-white transition-colors">
+        {{ group.title }}
+      </a>
+      <ul class="space-y-0.5">
+        {% for child in group.children %}
+        <li>
+          <a href="{{ child.url }}"
+             class="block px-3 py-2 text-sm font-semibold rounded transition-colors
+                    {% if child.slug == page.slug %}bg-zinc-800 text-white{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900{% endif %}">
+            {{ child.title }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </nav>
+  </aside>
+  {% endif %}
+
+  <article class="min-w-0">
+
+    {% if page.pull_quote %}
+    <blockquote class="border-l-4 border-tin-red pl-5 mb-8">
+      <p class="text-lg font-semibold text-white leading-relaxed">{{ page.pull_quote }}</p>
+    </blockquote>
+    {% endif %}
+
+    <h1 class="text-3xl sm:text-4xl font-black text-white mb-8 leading-tight">{{ page.title }}</h1>
+
+    {% if has_subnav %}
+    <nav class="lg:hidden mb-8 bg-zinc-900 rounded-lg p-4" aria-label="Section navigation">
+      <p class="text-[10px] font-bold tracking-widest uppercase text-zinc-600 mb-2">{{ group.title }}</p>
+      <ul class="space-y-1">
+        {% for child in group.children %}
+        <li>
+          <a href="{{ child.url }}"
+             class="block text-sm font-semibold py-1 transition-colors
+                    {% if child.slug == page.slug %}text-white{% else %}text-zinc-400 hover:text-white{% endif %}">
+            {{ child.title }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </nav>
+    {% endif %}
+
+    <div class="prose prose-invert prose-sm sm:prose-base max-w-none
+                prose-headings:font-black prose-headings:text-white
+                prose-a:text-tin-yellow prose-a:no-underline hover:prose-a:underline
+                prose-strong:text-white prose-li:text-zinc-300 prose-p:text-zinc-300">
+      {{ content }}
+    </div>
+
+  </article>
+</div>

@@ -1,0 +1,58 @@
+---
+layout: default
+title: Accessibility - The Tin Music and Arts
+permalink: /accessibility/
+description: Accessibility information for The Tin, Coventry - access, facilities, and how to reach us.
+---
+<div class="max-w-3xl mx-auto px-4 sm:px-6 py-14">
+  <p class="text-xs tracking-widest uppercase text-tin-red mb-2">Everyone welcome</p>
+  <h1 class="text-4xl font-black tracking-tight mb-6">Accessibility</h1>
+
+  <p class="text-zinc-300 text-base leading-relaxed mb-8">
+    {% if site.data.snippets.tin_accessibility_intro.body %}{{ site.data.snippets.tin_accessibility_intro.body }}{% else %}We want everyone to enjoy The Tin. The venue is on one level and fully wheelchair accessible.
+    If you have specific access requirements, please get in touch before your visit and we'll do
+    everything we can to help.{% endif %}
+  </p>
+
+  <h2 class="text-xl font-black mb-3">At the venue</h2>
+  {% if site.data.snippets.tin_accessibility_at_venue.body %}
+  <div class="prose prose-invert prose-sm max-w-none text-zinc-400 mb-8 [&_ul]:list-disc [&_ul]:list-inside">{{ site.data.snippets.tin_accessibility_at_venue.html }}</div>
+  {% else %}
+  <ul class="list-disc list-inside text-sm text-zinc-400 leading-relaxed space-y-1.5 mb-8">
+    <li>Step-free access throughout &mdash; the whole venue is on one level</li>
+    <li>Accessible toilet facilities</li>
+    <li>Companion tickets available &mdash; contact us to arrange</li>
+    <li>Relaxed, well-lit bar and seating areas away from the stage</li>
+  </ul>
+  {% endif %}
+
+  {% comment %} #634: access features driven by the Settings accessibility toggles {% endcomment %}
+  {% assign a11y = site.data.settings.accessibility %}
+  {% if a11y.step_free or a11y.hearing_loop or a11y.accessible_toilets %}
+  <h2 class="text-xl font-black mb-3">Access features</h2>
+  <ul class="text-sm text-zinc-300 leading-relaxed space-y-1.5 mb-8">
+    {% if a11y.step_free %}<li class="flex items-center gap-2"><span class="text-tin-teal" aria-hidden="true">&#10003;</span> Step-free access</li>{% endif %}
+    {% if a11y.hearing_loop %}<li class="flex items-center gap-2"><span class="text-tin-teal" aria-hidden="true">&#10003;</span> Hearing loop</li>{% endif %}
+    {% if a11y.accessible_toilets %}<li class="flex items-center gap-2"><span class="text-tin-teal" aria-hidden="true">&#10003;</span> Accessible toilets</li>{% endif %}
+  </ul>
+  {% endif %}
+
+  {% if a11y.notes %}
+  <div class="text-sm text-zinc-400 leading-relaxed mb-8">
+    {{ a11y.notes }}
+  </div>
+  {% endif %}
+
+  <h2 class="text-xl font-black mb-3">Getting here</h2>
+  <p class="text-sm text-zinc-400 leading-relaxed mb-8">
+    Find directions, parking, and public transport information on our
+    <a href="/find-us/" class="text-tin-red hover:underline">Find Us</a> page.
+  </p>
+
+  <div class="flex gap-3 flex-wrap">
+    <a href="/contact/" class="inline-block bg-tin-red text-white text-sm font-black px-6 py-3 rounded hover:bg-[#c0474d] transition-colors">Tell us your access needs</a>
+    <a href="mailto:{{ site.data.settings.email }}" class="inline-block border border-zinc-600 text-white text-sm font-bold px-6 py-3 rounded hover:border-white transition-colors">Email us</a>
+  </div>
+
+  <p class="text-xs text-zinc-600 mt-10">The Tin Music and Arts is a registered charity, no. {{ site.data.settings.charity_number | default: "1152636" }}.</p>
+</div>

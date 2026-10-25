@@ -1,0 +1,283 @@
+---
+layout: default
+title: The Tin Music and Arts - Coventry
+---
+
+<!-- SECTION 1 (red "about bar") removed per #600 -->
+
+
+<!-- =====================================================================
+     SECTION 2: HERO CAROUSEL
+     Uses featured_events if any, falls back to first 3 upcoming
+     ===================================================================== -->
+{% assign hero_events = site.data.featured_events %}
+{% if hero_events.size == 0 %}
+  {% assign hero_events = site.data.upcoming_events | slice: 0, 3 %}
+{% else %}
+  {% assign hero_events = hero_events | slice: 0, 3 %}
+{% endif %}
+{% assign hero_slugs = "" %}
+{% for e in hero_events %}{% assign hero_slugs = hero_slugs | append: e.slug | append: "," %}{% endfor %}
+
+<section id="hero" class="relative h-[70vh] min-h-[420px] overflow-hidden bg-zinc-950">
+
+  {% if hero_events.size > 0 %}
+    {% for event in hero_events %}
+      {% if event.image %}
+      <div class="hero-slide{% if forloop.first %} active{% endif %}" style="background-image:url('{{ event.image.medium }}');background-size:cover;background-position:center;">
+      {% else %}
+      <div class="hero-slide{% if forloop.first %} active{% endif %}" style="background-color:#18181b;">
+      {% endif %}
+        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10"></div>
+        <div class="absolute bottom-10 left-6 sm:left-12 max-w-xl z-10">
+          <p class="text-xs tracking-widest uppercase text-zinc-400 mb-2">{{ event.start_date | date: "%-d %B %Y" }}</p>
+          {% if event.promoters.size > 0 %}<p class="text-sm text-zinc-300 mb-1">{{ event.promoters[0].name }} presents</p>{% endif %}
+          <h2 class="text-4xl sm:text-5xl font-black tracking-tight leading-none mb-3">{{ event.name }}</h2>
+          {% if event.short_description %}<p class="text-sm text-zinc-400 italic mb-5">{{ event.short_description }}</p>{% endif %}
+          <a href="/events/{{ event.slug }}/" class="inline-block bg-white text-black text-sm font-bold px-6 py-2.5 rounded hover:bg-zinc-200 transition-colors">
+            {% if event.ticket_url %}Get Tickets{% elsif event.free_entry %}Free Entry - Find Out More{% else %}Find Out More{% endif %}
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+
+    {% if hero_events.size > 1 %}
+    <div class="absolute bottom-10 right-6 sm:right-12 z-10 flex gap-2">
+      {% for event in hero_events %}
+      <button class="hero-dot w-2 h-2 rounded-full transition-opacity {% if forloop.first %}bg-white{% else %}bg-white/30{% endif %}" aria-label="Slide {{ forloop.index }}"></button>
+      {% endfor %}
+    </div>
+    <button id="hero-prev" class="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-black/40 hover:bg-black/70 rounded-full text-white transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <button id="hero-next" class="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-black/40 hover:bg-black/70 rounded-full text-white transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </button>
+    {% endif %}
+
+  {% else %}
+    <div class="hero-slide active" style="background-color:#18181b;">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10"></div>
+      <div class="absolute bottom-10 left-6 sm:left-12 max-w-xl z-10">
+        <h2 class="text-4xl sm:text-5xl font-black tracking-tight leading-none mb-3">{% if site.data.snippets.tin_home_hero_empty_title.body %}{{ site.data.snippets.tin_home_hero_empty_title.body }}{% else %}Live Music in Coventry{% endif %}</h2>
+        <p class="text-sm text-zinc-400 italic mb-5">{% if site.data.snippets.tin_home_hero_empty_subtitle.body %}{{ site.data.snippets.tin_home_hero_empty_subtitle.body }}{% else %}Coal Vaults, Canal Basin - events coming soon.{% endif %}</p>
+        <a href="/events/" class="inline-block bg-white text-black text-sm font-bold px-6 py-2.5 rounded hover:bg-zinc-200 transition-colors">See all events</a>
+      </div>
+    </div>
+  {% endif %}
+
+</section>
+
+
+<!-- =====================================================================
+     SECTION 3: WHAT'S ON - excludes events already shown in carousel
+     ===================================================================== -->
+{% assign whats_on = "" | split: "" %}
+{% for event in site.data.upcoming_events %}
+  {% unless hero_slugs contains event.slug %}
+    {% if whats_on.size < 3 %}
+      {% assign whats_on = whats_on | push: event %}
+    {% endif %}
+  {% endunless %}
+{% endfor %}
+
+<section id="whats-on" class="py-14 px-4 sm:px-6 bg-zinc-950">
+  <div class="max-w-screen-xl mx-auto">
+
+    <div class="flex items-end justify-between mb-8">
+      <div>
+        <p class="text-xs tracking-widest uppercase text-tin-red mb-1">Live &amp; in person</p>
+        <h2 class="text-3xl font-black tracking-tight">What's On</h2>
+      </div>
+      <a href="/events/" class="hidden sm:inline-block text-sm font-semibold text-zinc-400 hover:text-white transition-colors">All events</a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-zinc-800">
+
+      {% if whats_on.size > 0 %}
+        {% for event in whats_on %}
+        <a href="/events/{{ event.slug }}/" class="group bg-zinc-950 hover:bg-zinc-900 transition-colors flex flex-col">
+          <div class="aspect-[4/3] overflow-hidden">
+            {% if event.image %}
+            <img src="{{ event.image.card }}" alt="{{ event.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 grayscale-[20%]" />
+            {% else %}
+            <div class="w-full h-full bg-zinc-900 flex items-center justify-center">
+              <svg class="w-12 h-12 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+            </div>
+            {% endif %}
+          </div>
+          <div class="p-4 flex flex-col flex-1 gap-1">
+            <p class="text-xs text-tin-red font-semibold tracking-wide">
+              {{ event.start_date | date: "%a %-d %b" }}{% if event.doors_time %} · {{ event.doors_time }}{% elsif event.start_time %} · {{ event.start_time }}{% endif %}
+            </p>
+            <h3 class="text-base font-bold leading-snug">{{ event.name }}</h3>
+            <p class="text-xs text-zinc-500 mt-auto pt-2">
+              {% if event.free_entry %}Free entry{% elsif event.ticket_url %}Tickets available{% else %}See event for details{% endif %}
+            </p>
+          </div>
+        </a>
+        {% endfor %}
+      {% else %}
+        <div class="col-span-3 bg-zinc-900 p-10 text-center">
+          <p class="text-zinc-500 text-sm">No upcoming events at the moment - check back soon.</p>
+        </div>
+      {% endif %}
+
+      <a href="/events/" class="group bg-tin-red hover:bg-[#c0474d] transition-colors flex flex-col items-center justify-center p-8 text-center min-h-[220px]">
+        <svg class="w-8 h-8 mb-4 opacity-80 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        <p class="text-lg font-black tracking-tight">See what's on</p>
+        <p class="text-sm mt-2 opacity-80">Full listings &amp; tickets</p>
+        <span class="mt-6 text-xs font-bold tracking-widest uppercase border border-white/60 px-3 py-1.5 rounded group-hover:border-white transition-colors">View all events</span>
+      </a>
+
+    </div>
+
+    <div class="mt-6 text-center sm:hidden">
+      <a href="/events/" class="text-sm font-semibold text-zinc-400 hover:text-white">All events</a>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- =====================================================================
+     SECTION 4: RECENT NEWS
+     ===================================================================== -->
+{% if site.data.news_items and site.data.news_items != empty %}
+<section id="recent-news" class="py-14 px-4 sm:px-6 bg-white text-black border-t border-zinc-200">
+  <div class="max-w-screen-xl mx-auto">
+
+    <h2 class="text-2xl font-black tracking-tight mb-8">Recent News</h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+      {% for item in site.data.news_items limit: 3 %}
+      <article class="bg-white flex flex-col border border-zinc-200">
+        {% if item.cover_image %}
+        <a href="/news/{{ item.slug }}/" class="block overflow-hidden">
+          <img src="{{ item.cover_image.medium }}" alt="{{ item.title }}"
+               class="w-full aspect-[4/3] object-cover" loading="lazy">
+        </a>
+        {% endif %}
+        <div class="flex flex-col flex-1 p-6 gap-3">
+          <h3 class="text-xl font-black leading-snug text-black">
+            <a href="/news/{{ item.slug }}/">{{ item.title }}</a>
+          </h3>
+          {% if item.pull_quote %}
+          <p class="text-sm text-zinc-600 leading-relaxed flex-1">{{ item.pull_quote }}</p>
+          {% endif %}
+          {% if item.published_at %}
+          <p class="text-sm font-bold text-black">{{ item.published_at | date: "%A %-d %B %Y" }}</p>
+          {% endif %}
+          <a href="/news/{{ item.slug }}/"
+             class="inline-block bg-black text-white text-xs font-bold px-5 py-2.5 hover:bg-zinc-800 transition-colors self-start">
+            Find out more
+          </a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    <div class="flex justify-end">
+      <a href="/news/"
+         class="inline-block border-2 border-black text-black text-sm font-black px-6 py-3 hover:bg-black hover:text-white transition-colors">
+        See all news and blogs
+      </a>
+    </div>
+
+  </div>
+</section>
+{% endif %}
+
+
+<!-- =====================================================================
+     SECTION 5: INFO PANELS - Find Us / Support / Accessibility
+     #610: each panel takes an optional header image — set a snippet keyed
+     tin_home_findus_image / tin_home_support_image / tin_home_accessibility_image
+     with an image URL as its body to enable it; otherwise the panel is icon-only.
+     ===================================================================== -->
+<section id="info" class="py-14 px-4 sm:px-6 bg-black border-t border-zinc-900">
+  <div class="max-w-screen-xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-px bg-zinc-800">
+
+      {% assign findus_img = site.data.snippets.tin_home_findus_image.body %}
+      <a href="/find-us/" class="group bg-zinc-950 p-8 flex flex-col gap-4 hover:bg-zinc-900 transition-colors">
+        {% if findus_img %}<div class="-mx-8 -mt-8 mb-2 h-32 overflow-hidden"><img src="{{ findus_img | strip }}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /></div>{% endif %}
+        <div class="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center text-tin-red">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-black mb-2">Find us</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed">{{ site.data.settings.address | newline_to_br }}</p>
+        </div>
+        <span class="mt-auto text-xs font-bold text-tin-red group-hover:underline">How to find us</span>
+      </a>
+
+      {% assign support_img = site.data.snippets.tin_home_support_image.body %}
+      <a href="/support/" class="group bg-tin-red p-8 flex flex-col gap-4 hover:bg-[#c0474d] transition-colors">
+        {% if support_img %}<div class="-mx-8 -mt-8 mb-2 h-32 overflow-hidden"><img src="{{ support_img | strip }}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /></div>{% endif %}
+        <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-black mb-2">Support Us</h3>
+          <p class="text-sm text-white/80 leading-relaxed">{% if site.data.snippets.tin_home_support_blurb.body %}{{ site.data.snippets.tin_home_support_blurb.body }}{% else %}We're a registered charity. Every donation helps us fund free and affordable events, our projects, and the next generation of Coventry artists.{% endif %}</p>
+        </div>
+        <span class="mt-auto text-xs font-bold text-white group-hover:underline">Donate &amp; support us</span>
+      </a>
+
+      {% assign accessibility_img = site.data.snippets.tin_home_accessibility_image.body %}
+      <a href="/accessibility/" class="group bg-zinc-950 p-8 flex flex-col gap-4 hover:bg-zinc-900 transition-colors">
+        {% if accessibility_img %}<div class="-mx-8 -mt-8 mb-2 h-32 overflow-hidden"><img src="{{ accessibility_img | strip }}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /></div>{% endif %}
+        <div class="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center text-tin-teal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-black mb-2">Accessibility</h3>
+          {% assign at = site.data.settings.accessibility %}
+          <p class="text-sm text-zinc-400 leading-relaxed">{% if at.notes %}{{ at.notes }}{% else %}The Coal Vaults is step-free accessible. Hearing loops available. Large print on request. Contact us with any access requirements ahead of your visit.{% endif %}</p>
+        </div>
+        <span class="mt-auto text-xs font-bold text-tin-teal group-hover:underline">Full accessibility info</span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- =====================================================================
+     SECTION 6: USE OUR SPACE
+     ===================================================================== -->
+{% assign hire_page = site.pages | where: "page_type", "hire" | first %}
+<section id="use-our-space" class="py-14 px-4 sm:px-6 bg-zinc-950 border-t border-zinc-900">
+  <div class="max-w-screen-xl mx-auto flex flex-col md:flex-row gap-10 items-center">
+    <div class="flex-1">
+      <p class="text-xs tracking-widest uppercase text-tin-teal mb-2">For artists &amp; organisations</p>
+      <h2 class="text-3xl font-black tracking-tight mb-4">Use our Space</h2>
+      {% if hire_page %}
+      <div class="text-sm text-zinc-400 leading-relaxed max-w-lg">{{ hire_page.content | strip_html | truncate: 300 }}</div>
+      {% else %}
+      <p class="text-sm text-zinc-400 leading-relaxed max-w-lg">The Coal Vaults is home to two rehearsal rooms, a fully-equipped performance space, and a bar. Available for hire to bands, artists, community groups, and private events. Affordable rates - because we're a charity, not a property developer.</p>
+      {% endif %}
+      <div class="flex flex-wrap gap-3 mt-6">
+        <a href="/venue-hire/" class="text-sm font-bold text-white border border-zinc-600 px-5 py-2.5 rounded hover:border-white transition-colors">Venue hire</a>
+        <a href="/rehearsal-rooms/" class="text-sm font-bold text-white border border-zinc-600 px-5 py-2.5 rounded hover:border-white transition-colors">Rehearsal rooms</a>
+        <a href="/community-space/" class="text-sm font-bold text-white border border-zinc-600 px-5 py-2.5 rounded hover:border-white transition-colors">Community space</a>
+        {% if site.data.settings.email %}
+        <a href="mailto:{{ site.data.settings.email }}" class="text-sm font-bold text-white border border-zinc-600 px-5 py-2.5 rounded hover:border-white transition-colors">Get in touch</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {%- comment -%}
+      #610: optional venue-space image beside the copy. Set a snippet keyed
+      `tin_home_space_image` with an image URL as its body to enable it;
+      without it the section stays text-only.
+    {%- endcomment -%}
+    {% assign space_img = site.data.snippets.tin_home_space_image.body %}
+    {% if space_img %}
+    <div class="flex-1 w-full">
+      <img src="{{ space_img | strip }}" alt="Inside The Tin" class="w-full h-64 md:h-80 object-cover rounded-lg" />
+    </div>
+    {% endif %}
+  </div>
+</section>

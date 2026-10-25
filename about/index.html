@@ -1,0 +1,90 @@
+---
+layout: default
+title: Charity & Impact
+permalink: /about/
+description: The Tin Music and Arts is a registered charity (No. 1152636) — a grassroots music venue and arts organisation at the Canal Basin in Coventry.
+---
+
+<div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-14">
+
+  <div class="max-w-3xl mb-14">
+    <p class="text-xs tracking-widest uppercase text-tin-red mb-2">Registered Charity No. {{ site.data.settings.charity_number | default: "1152636" }}</p>
+    <h1 class="text-4xl sm:text-5xl font-black tracking-tight mb-6">Charity &amp; Impact</h1>
+    <p class="text-zinc-300 text-base leading-relaxed mb-4">{% if site.data.snippets.tin_about_who_we_are %}{{ site.data.snippets.tin_about_who_we_are.body }}{% else %}The Tin is a registered charity running a grassroots music venue and arts organisation at the Canal Basin in Coventry. We exist to support local artists, nurture new talent, and make culture accessible to everyone.{% endif %}</p>
+    <p class="text-zinc-400 text-sm leading-relaxed">{% if site.data.snippets.tin_about_charity %}{{ site.data.snippets.tin_about_charity.body }}{% else %}Every ticket sold and every donation received helps us keep the lights on, the music playing, and our community projects running — from Deliaphonic and Boudica Festival to Live on Stage.{% endif %}</p>
+  </div>
+
+  {% comment %} #632: numeric impact stats, editable in Settings → Impact stats.
+     Renders only when at least one stat is set. {% endcomment %}
+  {% if site.data.settings.impact_stats and site.data.settings.impact_stats.size > 0 %}
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-zinc-800 mb-16">
+    {% for stat in site.data.settings.impact_stats %}
+    <div class="bg-zinc-950 p-8 text-center">
+      <div class="text-3xl sm:text-4xl font-black text-tin-red mb-1">{{ stat.value }}</div>
+      <div class="text-xs uppercase tracking-wider text-zinc-500">{{ stat.label }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% comment %} Impact highlights — qualitative copy (hardcoded in this template). {% endcomment %}
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-px bg-zinc-800 mb-16">
+    <div class="bg-zinc-950 p-8">
+      <h2 class="text-lg font-black mb-2">A stage for local talent</h2>
+      <p class="text-sm text-zinc-400 leading-relaxed">We give Coventry's emerging artists somewhere to play, rehearse, and grow — often their first proper gig.</p>
+    </div>
+    <div class="bg-zinc-950 p-8">
+      <h2 class="text-lg font-black mb-2">Culture for everyone</h2>
+      <p class="text-sm text-zinc-400 leading-relaxed">As a charity we keep events affordable and accessible, so live music and the arts stay open to all.</p>
+    </div>
+    <div class="bg-zinc-950 p-8">
+      <h2 class="text-lg font-black mb-2">Projects with purpose</h2>
+      <p class="text-sm text-zinc-400 leading-relaxed">Our projects platform underrepresented voices and celebrate the city's creative heritage.</p>
+    </div>
+  </div>
+
+  {% comment %} #611: Meet the Trustees. Renders from site.data.settings.trustees when
+     present; until then shows placeholder cards with empty photos, ready to fill. {% endcomment %}
+  <div class="border-t border-zinc-800 pt-12">
+    <p class="text-xs tracking-widest uppercase text-tin-red mb-2">Our board</p>
+    <h2 class="text-3xl font-black tracking-tight mb-8">Meet the Trustees</h2>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+      {% if site.data.settings.trustees and site.data.settings.trustees.size > 0 %}
+        {% assign trustees = site.data.settings.trustees %}
+      {% else %}
+        {% comment %} Placeholder scaffold — swap for real trustees when photos/bios are ready {% endcomment %}
+        {% assign trustees = "1,2,3,4,5,6" | split: "," %}
+      {% endif %}
+      {% for trustee in trustees %}
+      <div class="flex flex-col items-center text-center">
+        {% if trustee.photo %}
+        <img src="{{ trustee.photo }}" alt="{{ trustee.name }}" class="w-24 h-24 rounded-full object-cover ring-2 ring-zinc-800 mb-3">
+        {% else %}
+        <div class="w-24 h-24 rounded-full bg-zinc-900 ring-2 ring-zinc-800 mb-3 flex items-center justify-center" aria-hidden="true">
+          <svg class="w-10 h-10 text-zinc-700" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        {% endif %}
+        <p class="text-sm font-bold text-zinc-200">{% if trustee.name %}{{ trustee.name }}{% else %}Trustee{% endif %}</p>
+        <p class="text-xs text-zinc-500 mt-0.5">{% if trustee.role %}{{ trustee.role }}{% else %}Board of Trustees{% endif %}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% comment %} #632: funders & partners, editable in Settings → Funders & partners.
+     Renders only when at least one funder is set. {% endcomment %}
+  {% if site.data.settings.funders and site.data.settings.funders.size > 0 %}
+  <div class="border-t border-zinc-800 pt-12 mt-16">
+    <p class="text-xs tracking-widest uppercase text-tin-red mb-2">With thanks to</p>
+    <h2 class="text-3xl font-black tracking-tight mb-8">Funders &amp; partners</h2>
+    <div class="flex flex-wrap items-center gap-x-8 gap-y-4">
+      {% for funder in site.data.settings.funders %}
+      <a href="{{ funder.url }}" target="_blank" rel="noopener"
+         class="text-sm font-semibold text-zinc-300 hover:text-white hover:underline">{{ funder.name }}</a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>

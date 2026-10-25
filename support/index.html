@@ -1,0 +1,66 @@
+---
+layout: default
+title: Support Us - The Tin Music and Arts
+permalink: /support/
+redirect_from:
+  - /support-us
+---
+<div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-14">
+  <p class="text-xs tracking-widest uppercase text-tin-red mb-2">Make a difference</p>
+  <h1 class="text-4xl font-black tracking-tight mb-4">Support Us</h1>
+  <p class="text-zinc-400 text-sm leading-relaxed max-w-2xl mb-8">
+    {% if site.data.snippets.tin_support_intro.body %}{{ site.data.snippets.tin_support_intro.body }}{% else %}The Tin is a registered charity. We rely on donations and fundraising to keep our doors open, our events affordable, and our community projects running. Every pound helps.{% endif %}
+  </p>
+
+  {% comment %} #609/#637: short "where your support goes" blurb — editable via the tin_support_where_goes snippet (markdown) {% endcomment %}
+  <div class="max-w-2xl border-l-2 border-tin-red pl-5 mb-12">
+    <p class="text-xs font-bold tracking-widest uppercase text-zinc-500 mb-3">Where your support goes</p>
+    {% if site.data.snippets.tin_support_where_goes.body %}
+    <div class="prose prose-invert prose-sm max-w-none text-zinc-300 marker:text-tin-red">{{ site.data.snippets.tin_support_where_goes.html }}</div>
+    {% else %}
+    <ul class="space-y-2 text-sm text-zinc-300">
+      <li>Keeping ticket prices low so live music stays open to everyone.</li>
+      <li>Giving emerging Coventry artists a stage, rehearsal space, and support to grow.</li>
+      <li>Running our community projects — Deliaphonic, Boudica Festival, and Live on Stage.</li>
+    </ul>
+    {% endif %}
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-zinc-800 mb-10">
+
+    <div class="bg-zinc-950 p-8">
+      <h2 class="text-xl font-black mb-3">Donate</h2>
+      <p class="text-sm text-zinc-400 leading-relaxed mb-6">{% if site.data.snippets.tin_support_donate.body %}{{ site.data.snippets.tin_support_donate.body }}{% else %}A one-off or regular donation helps us fund free events, subsidise tickets, and support emerging artists who can't afford to take risks.{% endif %}</p>
+      {% if site.data.settings.donate_url %}
+      <a href="{{ site.data.settings.donate_url }}" target="_blank" rel="noopener"
+         class="inline-block bg-tin-red text-white text-sm font-black px-6 py-3 rounded hover:bg-[#c0474d] transition-colors">
+        {% if site.data.settings.donate_text %}{{ site.data.settings.donate_text }}{% else %}Donate now{% endif %}
+      </a>
+      {% endif %}
+    </div>
+
+    <div class="bg-zinc-950 p-8">
+      <h2 class="text-xl font-black mb-3">Volunteer</h2>
+      <p class="text-sm text-zinc-400 leading-relaxed mb-6">{% if site.data.snippets.tin_support_volunteer.body %}{{ site.data.snippets.tin_support_volunteer.body }}{% else %}Give your time instead of (or as well as) money. We always need bar staff, door staff, and people to help us run events and projects.{% endif %}</p>
+      <a href="/volunteer/" class="inline-block border border-zinc-600 text-white text-sm font-bold px-6 py-3 rounded hover:border-white transition-colors">Get involved</a>
+    </div>
+
+    <div class="bg-zinc-950 p-8">
+      <h2 class="text-xl font-black mb-3">Sponsor</h2>
+      <p class="text-sm text-zinc-400 leading-relaxed mb-6">{% if site.data.snippets.tin_support_sponsor.body %}{{ site.data.snippets.tin_support_sponsor.body }}{% else %}Businesses and organisations can sponsor events, projects, or the venue itself. We offer a range of packages and are happy to talk bespoke arrangements.{% endif %}</p>
+      <a href="/sponsor/" class="inline-block border border-zinc-600 text-white text-sm font-bold px-6 py-3 rounded hover:border-white transition-colors">Sponsorship info</a>
+    </div>
+
+    <div class="bg-zinc-950 p-8">
+      <h2 class="text-xl font-black mb-3">Spread the word</h2>
+      <p class="text-sm text-zinc-400 leading-relaxed mb-6">{% if site.data.snippets.tin_support_spread.body %}{{ site.data.snippets.tin_support_spread.body }}{% else %}Follow us, share our events, and tell your friends. Grassroots venues survive on word of mouth more than anything else.{% endif %}</p>
+      <div class="flex gap-3 flex-wrap">
+        {% if site.data.settings.social.instagram %}<a href="{{ site.data.settings.social.instagram }}" target="_blank" rel="noopener" class="text-xs font-bold border border-zinc-700 px-3 py-1.5 rounded hover:border-white transition-colors">Instagram</a>{% endif %}
+        {% if site.data.settings.social.facebook %}<a href="{{ site.data.settings.social.facebook }}" target="_blank" rel="noopener" class="text-xs font-bold border border-zinc-700 px-3 py-1.5 rounded hover:border-white transition-colors">Facebook</a>{% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <p class="text-xs text-zinc-600">Registered charity no. {{ site.data.settings.charity_number | default: "1152636" }}</p>
+</div>

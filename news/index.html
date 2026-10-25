@@ -1,0 +1,45 @@
+---
+layout: default
+title: News - The Tin Music and Arts
+permalink: /news/
+---
+<div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-14">
+  <p class="text-xs tracking-widest uppercase text-tin-yellow mb-2">Press &amp; announcements</p>
+  <h1 class="text-4xl font-black tracking-tight mb-10">News &amp; blogs</h1>
+
+  {% if site.data.news_items.size > 0 %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for item in site.data.news_items %}
+    <article class="bg-zinc-950 flex flex-col">
+      {% if item.cover_image %}
+      <a href="/news/{{ item.slug }}/" class="block overflow-hidden">
+        <img src="{{ item.cover_image.medium }}" alt="{{ item.title }}"
+             class="w-full aspect-[4/3] object-cover hover:scale-105 transition-transform duration-500"
+             loading="lazy">
+      </a>
+      {% endif %}
+      <div class="flex flex-col flex-1 p-6 gap-3">
+        {% if item.category %}
+        <p class="text-xs tracking-widest uppercase text-tin-yellow">{{ item.category }}</p>
+        {% endif %}
+        <h2 class="text-xl font-black leading-snug">
+          <a href="/news/{{ item.slug }}/" class="hover:text-tin-yellow transition-colors">{{ item.title }}</a>
+        </h2>
+        {% if item.pull_quote %}
+        <p class="text-sm text-zinc-400 leading-relaxed flex-1">{{ item.pull_quote }}</p>
+        {% endif %}
+        {% if item.published_at %}
+        <p class="text-sm font-bold text-zinc-300">{{ item.published_at | date: "%-d %B %Y" }}</p>
+        {% endif %}
+        <a href="/news/{{ item.slug }}/"
+           class="inline-block bg-zinc-900 border border-zinc-700 text-white text-xs font-bold px-5 py-2.5 hover:border-white transition-colors mt-1 self-start">
+          Find out more
+        </a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-zinc-500 text-sm">No news yet - check back soon.</p>
+  {% endif %}
+</div>

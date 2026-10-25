@@ -1,0 +1,174 @@
+---
+layout: default
+title: What's On
+---
+
+<div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-12">
+
+  <div class="mb-10">
+    <p class="text-xs tracking-widest uppercase text-tin-red mb-1">Live &amp; in person</p>
+    <h1 class="text-4xl font-black tracking-tight">What's On</h1>
+  </div>
+
+  {% if site.data.upcoming_events.size > 0 %}
+  {% comment %} #836: a fixed category taxonomy replaces the old dynamic genre chips; only categories with upcoming events are shown. Genres stay as card tags. {% endcomment %}
+  {% assign cat_keys   = "music,comedy,workshop,family,film,art,other" | split: "," %}
+  {% assign cat_labels = "Music,Comedy,Classes & Workshops,Family,Film,Art,Other" | split: "," %}
+  {% assign cats_in_use = 0 %}
+  {% for key in cat_keys %}{% assign _m = site.data.upcoming_events | where: "category", key %}{% if _m.size > 0 %}{% assign cats_in_use = cats_in_use | plus: 1 %}{% endif %}{% endfor %}
+
+  {% comment %} #836: category filter + search — upcoming events only {% endcomment %}
+  <div id="events-filter" class="mb-8 flex flex-col gap-4">
+    <label class="relative block max-w-sm">
+      <span class="sr-only">Search events</span>
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+      <input type="search" id="events-search" placeholder="Search by artist or event…" autocomplete="off"
+             class="w-full bg-zinc-900 border border-zinc-700 rounded pl-9 pr-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-tin-red" />
+    </label>
+    {% if cats_in_use > 0 %}
+    <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+      <button type="button" class="cat-chip is-active text-xs font-bold px-3 py-1.5 rounded-full border border-tin-red bg-tin-red text-white transition-colors" data-category="">All</button>
+      {% for key in cat_keys %}
+      {% assign _m = site.data.upcoming_events | where: "category", key %}
+      {% if _m.size > 0 %}
+      <button type="button" class="cat-chip text-xs font-bold px-3 py-1.5 rounded-full border border-zinc-700 text-zinc-300 hover:border-white transition-colors" data-category="{{ key }}">{{ cat_labels[forloop.index0] }}</button>
+      {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div id="events-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-zinc-800 mb-4">
+    {% for event in site.data.upcoming_events %}
+    <a href="/events/{{ event.slug }}/"
+       class="event-card group bg-zinc-950 hover:bg-zinc-900 transition-colors flex flex-col"
+       data-category="{{ event.category }}"
+       data-search="{{ event.name | downcase }} {% for entry in event.lineup %}{{ entry.name | downcase }} {% endfor %}">
+      <div class="aspect-[16/9] overflow-hidden">
+        {% if event.image %}
+        <img src="{{ event.image.medium }}" alt="{{ event.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 grayscale-[10%]" />
+        {% else %}
+        <div class="w-full h-full bg-zinc-900 flex items-center justify-center">
+          <svg class="w-12 h-12 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+        </div>
+        {% endif %}
+      </div>
+      <div class="p-5 flex flex-col flex-1 gap-2">
+        <p class="text-xs text-tin-red font-semibold tracking-wide">
+          {{ event.start_date | date: "%A %-d %B %Y" }}{% if event.doors_time %} · Doors {{ event.doors_time }}{% elsif event.start_time %} · {{ event.start_time }}{% endif %}
+        </p>
+        <h2 class="text-lg font-bold leading-snug">{{ event.name }}</h2>
+        {% if event.short_description %}<p class="text-sm text-zinc-400 leading-relaxed">{{ event.short_description }}</p>{% endif %}
+        {% if event.lineup.size > 0 %}
+        <p class="text-xs text-zinc-500">
+          {% for entry in event.lineup limit: 3 %}{{ entry.name }}{% unless forloop.last %}, {% endunless %}{% endfor %}
+        </p>
+        {% endif %}
+        <div class="mt-auto pt-3 flex items-center justify-between">
+          <p class="text-xs text-zinc-500">
+            {% if event.free_entry %}Free entry
+            {% elsif event.ticket_url %}Tickets available
+            {% else %}See event for details
+            {% endif %}
+            {% if event.age_restriction %} · {{ event.age_restriction }}{% endif %}
+          </p>
+          {% if event.genres.size > 0 %}
+          <div class="flex gap-1">
+            {% for genre in event.genres limit: 2 %}
+            <span class="text-xs bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">{{ genre }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  <p id="events-empty" class="hidden text-sm text-zinc-500 mb-16">No events match your search. <button type="button" id="events-reset" class="text-tin-yellow hover:underline font-semibold">Clear filters</button></p>
+
+  {% else %}
+  <div class="bg-zinc-900 rounded-xl p-16 text-center">
+    <p class="text-zinc-500 text-sm mb-2">No upcoming events at the moment.</p>
+    <p class="text-xs text-zinc-600">Check back soon or <a href="/#newsletter" class="text-tin-yellow hover:underline">sign up for updates</a>.</p>
+  </div>
+  {% endif %}
+
+  {% comment %} #607: CTA banners — turn browsers into promoters / supporters {% endcomment %}
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-zinc-800 mb-12">
+    <a href="/venue-hire" class="group bg-zinc-950 hover:bg-zinc-900 transition-colors p-8 flex flex-col gap-2">
+      <p class="text-xs tracking-widest uppercase text-tin-yellow">Promoters &amp; artists</p>
+      <h2 class="text-2xl font-black tracking-tight">Put on your own event</h2>
+      <p class="text-sm text-zinc-400 leading-relaxed">Hire our stage, rehearsal rooms or community space and bring your idea to life.</p>
+      <span class="mt-2 text-xs font-bold text-tin-yellow group-hover:underline">Hire the space →</span>
+    </a>
+    <a href="/support/" class="group bg-tin-red hover:bg-[#c0474d] transition-colors p-8 flex flex-col gap-2">
+      <p class="text-xs tracking-widest uppercase text-white/80">Registered Charity No. {{ site.data.settings.charity_number | default: "1152636" }}</p>
+      <h2 class="text-2xl font-black tracking-tight text-white">Support The Tin</h2>
+      <p class="text-sm text-white/90 leading-relaxed">Every ticket and donation keeps live music and creative projects alive in Coventry.</p>
+      <span class="mt-2 text-xs font-bold text-white group-hover:underline">Donate &amp; support us →</span>
+    </a>
+  </div>
+
+  {% if site.data.previous_events.size > 0 %}
+  <div class="border-t border-zinc-800 pt-8 text-center">
+    <a href="/events/past/" class="inline-flex items-center gap-2 text-sm font-bold text-zinc-400 hover:text-white transition-colors">
+      Browse past events
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+
+{% comment %} #836: client-side category filter + text search over the upcoming grid {% endcomment %}
+<script>
+(function () {
+  var grid = document.getElementById('events-grid');
+  if (!grid) return;
+  var cards  = Array.prototype.slice.call(grid.querySelectorAll('.event-card'));
+  var chips  = Array.prototype.slice.call(document.querySelectorAll('.cat-chip'));
+  var search = document.getElementById('events-search');
+  var empty  = document.getElementById('events-empty');
+  var reset  = document.getElementById('events-reset');
+  var activeCategory = '';
+
+  function apply() {
+    var q = ((search && search.value) || '').trim().toLowerCase();
+    var shown = 0;
+    cards.forEach(function (card) {
+      var cat = card.getAttribute('data-category') || '';
+      var hay = card.getAttribute('data-search') || '';
+      var show = (!activeCategory || cat === activeCategory) && (!q || hay.indexOf(q) !== -1);
+      card.style.display = show ? '' : 'none';
+      if (show) shown++;
+    });
+    if (empty) empty.classList.toggle('hidden', shown !== 0);
+  }
+
+  function setActiveChip(btn) {
+    chips.forEach(function (c) {
+      var on = c === btn;
+      c.classList.toggle('bg-tin-red', on);
+      c.classList.toggle('text-white', on);
+      c.classList.toggle('border-tin-red', on);
+      c.classList.toggle('text-zinc-300', !on);
+      c.classList.toggle('border-zinc-700', !on);
+    });
+  }
+
+  chips.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      activeCategory = btn.getAttribute('data-category') || '';
+      setActiveChip(btn);
+      apply();
+    });
+  });
+  if (search) search.addEventListener('input', apply);
+  if (reset) reset.addEventListener('click', function () {
+    activeCategory = '';
+    if (search) search.value = '';
+    if (chips[0]) setActiveChip(chips[0]);
+    apply();
+  });
+}());
+</script>
