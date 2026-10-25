@@ -46,6 +46,22 @@ layout: default
                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
       </div>
       {% endif %}
+
+      {% if page.past_events and page.past_events.size > 0 %}
+      <div class="mt-10">
+        <h2 class="text-[10px] font-bold tracking-widest uppercase text-zinc-600 mb-4">Past shows at The Tin</h2>
+        <ul class="border-t border-zinc-800">
+          {% for ev in page.past_events %}
+          <li class="border-b border-zinc-800">
+            <a href="/events/{{ ev.slug }}/" class="group flex items-baseline justify-between gap-4 py-3 -mx-2 px-2 rounded hover:bg-zinc-900 transition-colors">
+              <span class="font-semibold text-zinc-200 group-hover:text-tin-red transition-colors">{{ ev.name }}</span>
+              <span class="shrink-0 text-xs text-zinc-500">{{ ev.start_date | date: "%b %Y" }}</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
     </div>
 
     <aside class="mt-8 lg:mt-0">

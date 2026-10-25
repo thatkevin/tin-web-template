@@ -1,0 +1,98 @@
+---
+layout: default
+title: Artists
+permalink: /artists/
+---
+
+<div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-12">
+
+  <div class="mb-10">
+    <p class="text-xs tracking-widest uppercase text-tin-red mb-1">Who's played here</p>
+    <h1 class="text-4xl font-black tracking-tight">Artists</h1>
+  </div>
+
+  {% if site.data.artists.size > 0 %}
+  <div class="mb-8">
+    <label class="relative block max-w-sm">
+      <span class="sr-only">Search artists</span>
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+      <input type="search" id="artists-search" placeholder="Search by name or genre…" autocomplete="off"
+             class="w-full bg-zinc-900 border border-zinc-700 rounded pl-9 pr-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-tin-red" />
+    </label>
+  </div>
+
+  <div id="artists-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+    {% for artist in site.data.artists %}
+    <a href="/artists/{{ artist.slug }}/"
+       class="artist-card group block"
+       data-search="{{ artist.name | downcase }} {% for g in artist.genres %}{{ g | downcase }} {% endfor %}{{ artist.home_city | downcase }}">
+      <div class="aspect-square overflow-hidden rounded-lg bg-zinc-900 mb-3">
+        {% if artist.photo %}
+        <img src="{{ artist.photo.square | default: artist.photo.medium }}" alt="{{ artist.name }}" loading="lazy"
+             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        {% else %}
+        <div class="w-full h-full flex items-center justify-center text-zinc-700">
+          <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        </div>
+        {% endif %}
+      </div>
+      <h2 class="font-bold leading-snug group-hover:text-tin-red transition-colors">{{ artist.name }}</h2>
+      {% if artist.home_city and artist.home_city != '' %}<p class="text-xs text-zinc-500 mt-0.5">{{ artist.home_city }}</p>{% endif %}
+      {% if artist.past_event_count and artist.past_event_count > 0 %}
+      <p class="text-xs text-zinc-600 mt-1">{{ artist.past_event_count }} show{% unless artist.past_event_count == 1 %}s{% endunless %} here</p>
+      {% endif %}
+    </a>
+    {% endfor %}
+  </div>
+
+  <div id="artists-view-more" class="hidden mt-8 text-center">
+    <button type="button" id="artists-view-more-btn" class="inline-flex items-center gap-2 text-sm font-bold text-zinc-300 bg-zinc-900 hover:bg-zinc-800 hover:text-white border border-zinc-700 rounded-full px-5 py-2.5 transition-colors">
+      View more
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+    </button>
+  </div>
+
+  <p id="artists-empty" class="hidden text-sm text-zinc-500 mt-6">No artists match your search. <button type="button" id="artists-reset" class="text-tin-yellow hover:underline font-semibold">Clear</button></p>
+
+  {% else %}
+  <p class="text-zinc-500">No artists listed yet — check back soon.</p>
+  {% endif %}
+</div>
+
+<script>
+(function () {
+  var grid = document.getElementById('artists-grid');
+  if (!grid) return;
+  var cards = Array.prototype.slice.call(grid.querySelectorAll('.artist-card'));
+  var search = document.getElementById('artists-search');
+  var moreWrap = document.getElementById('artists-view-more');
+  var moreBtn = document.getElementById('artists-view-more-btn');
+  var empty = document.getElementById('artists-empty');
+  var reset = document.getElementById('artists-reset');
+  var PAGE_SIZE = 12;
+  var visibleCount = PAGE_SIZE;
+
+  function apply() {
+    var q = (search.value || '').trim().toLowerCase();
+    var shown = 0, matched = 0;
+    cards.forEach(function (card) {
+      var hay = card.getAttribute('data-search') || '';
+      var isMatch = !q || hay.indexOf(q) !== -1;
+      if (isMatch) {
+        matched++;
+        if (shown < visibleCount) { card.classList.remove('hidden'); shown++; }
+        else { card.classList.add('hidden'); }
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+    moreWrap.classList.toggle('hidden', matched <= visibleCount);
+    empty.classList.toggle('hidden', matched !== 0);
+  }
+
+  search.addEventListener('input', function () { visibleCount = PAGE_SIZE; apply(); });
+  moreBtn.addEventListener('click', function () { visibleCount += PAGE_SIZE; apply(); });
+  if (reset) reset.addEventListener('click', function () { search.value = ''; visibleCount = PAGE_SIZE; apply(); search.focus(); });
+  apply();
+})();
+</script>
