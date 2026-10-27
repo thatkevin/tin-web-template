@@ -94,6 +94,27 @@
 </head>
 <body class="bg-zinc-950 text-white font-sans antialiased">
 
+<!-- Network bar (thin, non-sticky): quick links across The Tin's projects.
+     Uses the config-driven network nav when present (#965); falls back to the
+     projects until that ships. The main nav below is unchanged. -->
+<div class="bg-black border-b border-zinc-900">
+  <div class="max-w-screen-xl mx-auto px-4 sm:px-6 flex items-center h-9 gap-3">
+    <span class="text-[11px] font-semibold uppercase tracking-wider text-zinc-600 flex-shrink-0">Our projects</span>
+    <nav class="flex items-center gap-0.5 overflow-x-auto" aria-label="Project network">
+      {% assign netnav = site.data.settings.navigation.network %}
+      {% if netnav and netnav.size > 0 %}
+        {% for item in netnav %}
+        <a href="{{ item.path }}" class="px-2.5 py-1 text-xs font-medium text-zinc-500 hover:text-zinc-200 transition-colors whitespace-nowrap">{{ item.label }}</a>
+        {% endfor %}
+      {% else %}
+        <a href="https://deliaphonic.gigkit.site" class="px-2.5 py-1 text-xs font-medium text-zinc-500 hover:text-zinc-200 transition-colors whitespace-nowrap">Deliaphonic</a>
+        <a href="https://boudica.gigkit.site" class="px-2.5 py-1 text-xs font-medium text-zinc-500 hover:text-zinc-200 transition-colors whitespace-nowrap">Boudica</a>
+        <a href="https://live-on-stage.gigkit.site" class="px-2.5 py-1 text-xs font-medium text-zinc-500 hover:text-zinc-200 transition-colors whitespace-nowrap">Live on Stage</a>
+      {% endif %}
+    </nav>
+  </div>
+</div>
+
 <!-- =====================================================================
      HEADER
      ===================================================================== -->
