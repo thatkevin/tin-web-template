@@ -5,9 +5,20 @@ title: What's On
 
 <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-12">
 
-  <div class="mb-10">
-    <p class="text-xs tracking-widest uppercase text-tin-red mb-1">Live &amp; in person</p>
-    <h1 class="text-4xl font-black tracking-tight">What's On</h1>
+  {% comment %} Title and search share one row on sm+ so the search takes no extra vertical space; stacks on mobile. {% endcomment %}
+  <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+    <div>
+      <p class="text-xs tracking-widest uppercase text-tin-red mb-1">Live &amp; in person</p>
+      <h1 class="text-4xl font-black tracking-tight">What's On</h1>
+    </div>
+    {% if site.data.upcoming_events.size > 0 %}
+    <label class="relative block w-full sm:w-80 sm:shrink-0">
+      <span class="sr-only">Search events</span>
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+      <input type="search" id="events-search" placeholder="Search by artist or event…" autocomplete="off"
+             class="w-full bg-zinc-900 border border-zinc-700 rounded pl-9 pr-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-tin-red" />
+    </label>
+    {% endif %}
   </div>
 
   {% if site.data.upcoming_events.size > 0 %}
@@ -17,15 +28,9 @@ title: What's On
   {% assign cats_in_use = 0 %}
   {% for key in cat_keys %}{% assign _m = site.data.upcoming_events | where: "category", key %}{% if _m.size > 0 %}{% assign cats_in_use = cats_in_use | plus: 1 %}{% endif %}{% endfor %}
 
-  {% comment %} #836: category filter + search — upcoming events only {% endcomment %}
-  <div id="events-filter" class="mb-8 flex flex-col gap-4">
-    <label class="relative block max-w-sm">
-      <span class="sr-only">Search events</span>
-      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
-      <input type="search" id="events-search" placeholder="Search by artist or event…" autocomplete="off"
-             class="w-full bg-zinc-900 border border-zinc-700 rounded pl-9 pr-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-tin-red" />
-    </label>
-    {% if cats_in_use > 0 %}
+  {% comment %} #836: category filter — upcoming events only (search now lives in the page header row) {% endcomment %}
+  {% if cats_in_use > 0 %}
+  <div id="events-filter" class="mb-8">
     <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
       <button type="button" class="cat-chip is-active text-xs font-bold px-3 py-1.5 rounded-full border border-tin-red bg-tin-red text-white transition-colors" data-category="">All</button>
       {% for key in cat_keys %}
@@ -35,8 +40,8 @@ title: What's On
       {% endif %}
       {% endfor %}
     </div>
-    {% endif %}
   </div>
+  {% endif %}
 
   <div id="events-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-zinc-800 mb-4">
     {% for event in site.data.upcoming_events %}
