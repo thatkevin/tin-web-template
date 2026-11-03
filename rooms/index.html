@@ -98,6 +98,24 @@ permalink: /rooms/
             </div>
             {% endif %}
 
+            {% if site.data.equipment.size > 0 %}
+            <div class="tin-equipment">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Add equipment</label>
+              <div class="space-y-2">
+                {% for item in site.data.equipment %}
+                <label class="flex items-center gap-3 bg-zinc-900 border border-zinc-700 rounded px-3 py-2 cursor-pointer">
+                  <input type="checkbox" class="tin-equip-check accent-tin-yellow" value="{{ item.id }}"
+                         data-equip-id="{{ item.id }}" data-equip-price="{{ item.price }}">
+                  <span class="flex-1 text-sm text-zinc-200">{{ item.name }}<span class="text-zinc-500"> &middot; &pound;{{ item.price }}</span>{% if item.description %}<span class="block text-xs text-zinc-500">{{ item.description }}</span>{% endif %}</span>
+                  <input type="number" class="tin-equip-qty w-16 bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-zinc-100 text-center focus:outline-none focus:ring-1 focus:ring-tin-yellow"
+                         min="1" max="{{ item.stock }}" value="1" aria-label="Quantity of {{ item.name }}" disabled>
+                </label>
+                {% endfor %}
+              </div>
+              <p class="text-xs text-zinc-500 mt-1">Equipment is added at the listed price and confirmed subject to availability for your chosen time.</p>
+            </div>
+            {% endif %}
+
             <div>
               <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Anything else?</label>
               <textarea name="notes" rows="3" class="w-full bg-zinc-900 border border-zinc-700 rounded px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow resize-y"></textarea>
@@ -231,17 +249,47 @@ permalink: /rooms/
       }
     }
 
+    // Quantity for a ticked add-on, clamped to [1, stock]. 0, blank or a typed
+    // over-max value is corrected (not left to the `|| 1` falsy trap) so the
+    // quote and POST match what can actually be booked. writeBack reflects the
+    // clamp in the input once the user leaves the field.
+    function clampedQty(cb, writeBack) {
+      var qtyEl = cb.closest('label').querySelector('.tin-equip-qty');
+      if (!qtyEl) return 1;
+      var max = parseInt(qtyEl.max, 10) || 1;
+      var qty = parseInt(qtyEl.value, 10);
+      if (isNaN(qty) || qty < 1) qty = 1;
+      if (qty > max) qty = max;
+      if (writeBack) qtyEl.value = qty;
+      return qty;
+    }
+
+    // Full price of the ticked equipment add-ons (block discount never applies
+    // to equipment, matching the server-side quote).
+    function equipmentTotal() {
+      var sum = 0;
+      form.querySelectorAll('.tin-equip-check').forEach(function (cb) {
+        if (!cb.checked) return;
+        sum += (parseFloat(cb.dataset.equipPrice) || 0) * clampedQty(cb, false);
+      });
+      return sum;
+    }
+
     function updateQuote() {
       var s = toMin(startSel.value), e = toMin(endSel.value);
-      if (s === null || e === null || e <= s || !cfg.rate) { quoteEl.classList.add('hidden'); return; }
+      if (s === null || e === null || e <= s) { quoteEl.classList.add('hidden'); return; }
       var hours = (e - s) / 60;
       var pct = 0;
       cfg.tiers.slice().sort(function (a, b) { return b.hours - a.hours; }).some(function (tier) {
         if (hours >= tier.hours) { pct = tier.percent; return true; } return false;
       });
-      var total = (cfg.rate * hours) * (1 - (pct / 100));
+      var roomTotal = cfg.rate ? (cfg.rate * hours) * (1 - (pct / 100)) : 0;
+      var equip = equipmentTotal();
+      var total = roomTotal + equip;
+      if (total <= 0) { quoteEl.classList.add('hidden'); return; }
       var txt = hours + (hours === 1 ? ' hour' : ' hours') + ' · £' + total.toFixed(2);
-      if (pct > 0) txt += ' (' + pct + '% block discount)';
+      if (pct > 0) txt += ' (' + pct + '% block discount on room)';
+      if (equip > 0) txt += ' · incl. £' + equip.toFixed(2) + ' equipment';
       quoteEl.textContent = txt; quoteEl.classList.remove('hidden');
     }
 
@@ -267,6 +315,17 @@ permalink: /rooms/
     startSel.addEventListener('change', function () { buildEndOptions(); updateQuote(); });
     endSel.addEventListener('change', updateQuote);
 
+    // Equipment add-ons: enable the quantity box only when ticked, and keep the
+    // live quote in step.
+    form.querySelectorAll('.tin-equip-check').forEach(function (cb) {
+      var qtyEl = cb.closest('label').querySelector('.tin-equip-qty');
+      cb.addEventListener('change', function () { if (qtyEl) qtyEl.disabled = !cb.checked; updateQuote(); });
+      if (qtyEl) {
+        qtyEl.addEventListener('input', updateQuote);
+        qtyEl.addEventListener('change', function () { clampedQty(cb, true); updateQuote(); });
+      }
+    });
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var date = dateInput.value, start = startSel.value, end = endSel.value;
@@ -288,6 +347,12 @@ permalink: /rooms/
       body.append('ends_at', iso(date, end));
       body.append('hire_type', hireTypeField ? hireTypeField.value : '');
       body.append('notes', form.querySelector('[name=notes]').value);
+
+      form.querySelectorAll('.tin-equip-check').forEach(function (cb) {
+        if (!cb.checked) return;
+        body.append('items[][equipment_id]', cb.dataset.equipId);
+        body.append('items[][quantity]', clampedQty(cb, false));
+      });
 
       fetch('/api/bookings', { method: 'POST', headers: { 'Accept': 'application/json' }, body: body })
         .then(function (r) { return r.json(); })
