@@ -3,7 +3,7 @@ layout: default
 title: Room hire - The Tin Music and Arts
 permalink: /rooms/
 ---
-<div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-12">
+<div class="tin-rooms max-w-screen-xl mx-auto px-4 sm:px-6 py-12">
 
   <div class="mb-10">
     <p class="text-xs tracking-widest uppercase text-tin-yellow mb-1">Hire a space</p>
@@ -155,6 +155,22 @@ permalink: /rooms/
 
 <script>
 (function () {
+  // Return banner after a Stripe Checkout redirect (?booking=confirmed|cancelled).
+  // Runs before the fetch guard so it shows even on older browsers.
+  (function () {
+    var m = (location.search.match(/[?&]booking=(confirmed|cancelled)/) || [])[1];
+    var box = document.querySelector('.tin-rooms');
+    if (!m || !box) return;
+    var el = document.createElement('div');
+    el.className = 'mb-8 rounded-lg px-4 py-3 text-sm ' + (m === 'confirmed'
+      ? 'bg-emerald-900/40 border border-emerald-700 text-emerald-300'
+      : 'bg-zinc-900 border border-zinc-700 text-zinc-300');
+    el.textContent = (m === 'confirmed')
+      ? "Thanks — we're processing your payment. Once it clears we'll confirm your booking and email you the details."
+      : 'Payment cancelled — nothing was charged. Your slot may be held for a short while; if you still want it, try again shortly or get in touch.';
+    box.insertBefore(el, box.firstChild);
+  })();
+
   if (!window.fetch) return;
 
   function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -358,6 +374,12 @@ permalink: /rooms/
         .then(function (r) { return r.json(); })
         .then(function (json) {
           if (json.ok) {
+            if (json.checkout_url) {
+              // Venue takes payment up front — hand off to Stripe Checkout.
+              show('Taking you to secure payment…', true);
+              window.location.assign(json.checkout_url);
+              return;
+            }
             show("Request sent. We'll be in touch to confirm.", true);
             form.querySelectorAll('input,select,textarea,button').forEach(function (el) { el.disabled = true; });
           } else {
