@@ -3,74 +3,138 @@ layout: default
 title: Room hire - The Tin Music and Arts
 permalink: /rooms/
 ---
+<style>
+  /* Progress stepper — scoped styles so it doesn't depend on the Tailwind build
+     picking up JS-toggled classes. */
+  .tin-stepper { list-style: none; margin: 0; padding: 0; }
+  .tin-step { display: inline-flex; align-items: center; gap: .4rem; color: #71717a; cursor: pointer; background: none; border: 0; font: inherit; padding: 0; }
+  .tin-step-num { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 9999px; border: 1px solid #3f3f46; font-size: .72rem; font-weight: 700; flex: none; }
+  .tin-step-check { display: none; }
+  .tin-step[data-state="current"] { color: #edc656; }
+  .tin-step[data-state="current"] .tin-step-num { border-color: #edc656; color: #edc656; }
+  .tin-step[data-state="done"] { color: #d4d4d8; }
+  .tin-step[data-state="done"] .tin-step-num { background: #edc656; border-color: #edc656; color: #000; }
+  .tin-step[data-state="done"] .tin-step-num .tin-step-n { display: none; }
+  .tin-step[data-state="done"] .tin-step-check { display: inline; }
+  .tin-step-sep { flex: 1 1 auto; height: 1px; min-width: .5rem; background: #27272a; }
+  @media (max-width: 640px) { .tin-step-label { display: none; } .tin-step-sep { min-width: 1.25rem; } }
+
+  /* Journey: WITH JS, panels are hidden and revealed on selection; WITHOUT JS
+     every room + form stays visible so the booking forms are always reachable
+     (progressive enhancement). The .tin-js flag is set before paint below. */
+  .tin-js .tin-room-panel { display: none; }
+  .tin-js .tin-room-panel.is-open { display: block; }
+  .tin-js .tin-rooms-overview.is-hidden { display: none; }
+</style>
+<script>document.documentElement.className += ' tin-js';</script>
 <div class="tin-rooms max-w-screen-xl mx-auto px-4 sm:px-6 py-12">
 
   <div class="mb-10">
     <p class="text-xs tracking-widest uppercase text-tin-yellow mb-1">Hire a space</p>
     <h1 class="text-4xl font-black tracking-tight">Room hire</h1>
-    <p class="text-zinc-400 mt-3 max-w-2xl">Pick a room, choose a date and time, and send us a request. We'll confirm by email - nothing is booked until we say so.</p>
+    <p class="text-zinc-400 mt-3 max-w-2xl">Choose a room, pick a date and time, add any gear you need, and book.</p>
   </div>
 
   {% if site.data.rooms.size > 0 %}
-  <div class="space-y-px bg-zinc-800">
+
+  {%- comment -%} Step 1 of the journey: choose a room. {%- endcomment -%}
+  <div class="tin-rooms-overview grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
     {% for room in site.data.rooms %}
-    <section id="room-{{ room.slug }}" class="bg-zinc-950 p-6 sm:p-8">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <a href="#room-{{ room.slug }}" class="tin-room-card group block bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden hover:border-tin-yellow transition-colors">
+      {% if room.photo_urls.size > 0 %}
+      <div class="aspect-[16/9] overflow-hidden bg-zinc-900">
+        <img src="{{ room.photo_urls[0] }}" alt="{{ room.name }}" class="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition duration-300" loading="lazy" />
+      </div>
+      {% endif %}
+      <div class="p-5">
+        <h2 class="text-xl font-black tracking-tight mb-2">{{ room.name }}</h2>
+        {%- comment -%} Plain-text middot separators: flex strips inter-item
+        whitespace, so spacing goes in the content itself. {%- endcomment -%}
+        <p class="text-xs text-zinc-400 mb-3">
+          {%- assign meta = "" -%}
+          {%- if room.capacity_standing -%}{%- assign meta = meta | append: " &middot; Up to " | append: room.capacity_standing | append: " standing" -%}{%- endif -%}
+          {%- if room.hourly_rate -%}{%- assign meta = meta | append: " &middot; &pound;" | append: room.hourly_rate | append: "/hr" -%}{%- endif -%}
+          {%- if room.pa_included -%}{%- assign meta = meta | append: " &middot; PA included" -%}{%- endif -%}
+          {{ meta | remove_first: " &middot; " }}
+        </p>
+        <span class="inline-flex items-center gap-1 text-sm font-black text-tin-yellow group-hover:gap-2 transition-all">Book this room &rarr;</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
 
-        {%- comment -%} Room details {%- endcomment -%}
-        <div>
-          <h2 class="text-2xl font-black tracking-tight mb-3">{{ room.name }}</h2>
+  {%- comment -%} One panel per room, revealed when its card is chosen. {%- endcomment -%}
+  {% for room in site.data.rooms %}
+  <section id="room-{{ room.slug }}" class="tin-room-panel">
+    <button type="button" class="tin-back inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-tin-yellow transition-colors mb-5">
+      <span aria-hidden="true">&larr;</span> All rooms
+    </button>
 
-          {% if room.photo_urls.size > 0 %}
-          <div class="aspect-[16/9] overflow-hidden rounded-lg mb-4">
-            <img src="{{ room.photo_urls[0] }}" alt="{{ room.name }}" class="w-full h-full object-cover grayscale-[10%]" />
-          </div>
-          {% endif %}
+    <h2 class="text-3xl font-black tracking-tight mb-6">{{ room.name }}</h2>
 
-          <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm mb-4">
-            {% if room.capacity_seated %}<div><dt class="text-xs uppercase tracking-wider text-zinc-500">Seated</dt><dd class="text-zinc-200">{{ room.capacity_seated }}</dd></div>{% endif %}
-            {% if room.capacity_standing %}<div><dt class="text-xs uppercase tracking-wider text-zinc-500">Standing</dt><dd class="text-zinc-200">{{ room.capacity_standing }}</dd></div>{% endif %}
-            {% if room.hourly_rate %}<div><dt class="text-xs uppercase tracking-wider text-zinc-500">Per hour</dt><dd class="text-zinc-200">&pound;{{ room.hourly_rate }}</dd></div>{% endif %}
-            {% if room.day_rate %}<div><dt class="text-xs uppercase tracking-wider text-zinc-500">Per day</dt><dd class="text-zinc-200">&pound;{{ room.day_rate }}</dd></div>{% endif %}
-            {% if room.pa_included %}<div><dt class="text-xs uppercase tracking-wider text-zinc-500">PA</dt><dd class="text-zinc-200">Included</dd></div>{% endif %}
-          </dl>
+    {%- comment -%} Progress stepper — JS sets data-state per step as fields fill. {%- endcomment -%}
+    <ol class="tin-stepper flex items-center gap-2 sm:gap-3 mb-8 text-xs font-semibold">
+      <li><button type="button" class="tin-step" data-step="when" data-state="current"><span class="tin-step-num"><span class="tin-step-n">1</span><span class="tin-step-check">&check;</span></span><span class="tin-step-label">When</span></button></li>
+      <li class="tin-step-sep" aria-hidden="true"></li>
+      <li><button type="button" class="tin-step" data-step="extras"><span class="tin-step-num"><span class="tin-step-n">2</span><span class="tin-step-check">&check;</span></span><span class="tin-step-label">Extras</span></button></li>
+      <li class="tin-step-sep" aria-hidden="true"></li>
+      <li><button type="button" class="tin-step" data-step="details"><span class="tin-step-num"><span class="tin-step-n">3</span><span class="tin-step-check">&check;</span></span><span class="tin-step-label">Your details</span></button></li>
+      <li class="tin-step-sep" aria-hidden="true"></li>
+      <li><button type="button" class="tin-step" data-step="pay"><span class="tin-step-num"><span class="tin-step-n">4</span><span class="tin-step-check">&check;</span></span><span class="tin-step-label">Confirm &amp; pay</span></button></li>
+    </ol>
 
-          {% if room.pa_spec %}<p class="text-sm text-zinc-400 mb-2"><span class="text-zinc-500">PA: </span>{{ room.pa_spec }}</p>{% endif %}
-          {% if room.gear_list %}<p class="text-sm text-zinc-400 mb-2"><span class="text-zinc-500">Gear: </span>{{ room.gear_list }}</p>{% endif %}
-          {% if room.hire_notes %}<p class="text-sm text-zinc-400 mb-2">{{ room.hire_notes }}</p>{% endif %}
-          {% if room.accessibility_notes %}<p class="text-sm text-zinc-400">{{ room.accessibility_notes }}</p>{% endif %}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+      {%- comment -%} Room details (shows second on mobile, left on desktop). {%- endcomment -%}
+      <div class="order-2 lg:order-1">
+        {% if room.photo_urls.size > 0 %}
+        <div class="aspect-[16/9] overflow-hidden rounded-lg mb-4">
+          <img src="{{ room.photo_urls[0] }}" alt="{{ room.name }}" class="w-full h-full object-cover grayscale-[10%]" loading="lazy" />
         </div>
+        {% endif %}
+        <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm mb-4">
+          {% if room.capacity_seated %}<div><dt class="text-xs uppercase tracking-wider text-zinc-500">Seated</dt><dd class="text-zinc-200">{{ room.capacity_seated }}</dd></div>{% endif %}
+          {% if room.capacity_standing %}<div><dt class="text-xs uppercase tracking-wider text-zinc-500">Standing</dt><dd class="text-zinc-200">{{ room.capacity_standing }}</dd></div>{% endif %}
+          {% if room.hourly_rate %}<div><dt class="text-xs uppercase tracking-wider text-zinc-500">Per hour</dt><dd class="text-zinc-200">&pound;{{ room.hourly_rate }}</dd></div>{% endif %}
+          {% if room.day_rate %}<div><dt class="text-xs uppercase tracking-wider text-zinc-500">Per day</dt><dd class="text-zinc-200">&pound;{{ room.day_rate }}</dd></div>{% endif %}
+          {% if room.pa_included %}<div><dt class="text-xs uppercase tracking-wider text-zinc-500">PA</dt><dd class="text-zinc-200">Included</dd></div>{% endif %}
+        </dl>
+        {% if room.pa_spec %}<p class="text-sm text-zinc-400 mb-2"><span class="text-zinc-500">PA: </span>{{ room.pa_spec }}</p>{% endif %}
+        {% if room.gear_list %}<p class="text-sm text-zinc-400 mb-2"><span class="text-zinc-500">Gear: </span>{{ room.gear_list }}</p>{% endif %}
+        {% if room.hire_notes %}<p class="text-sm text-zinc-400 mb-2">{{ room.hire_notes }}</p>{% endif %}
+        {% if room.accessibility_notes %}<p class="text-sm text-zinc-400">{{ room.accessibility_notes }}</p>{% endif %}
 
-        {%- comment -%} Booking request form {%- endcomment -%}
-        <div>
-          <form class="tin-booking-form space-y-4"
-                data-room-slug="{{ room.slug }}"
-                data-room-id="{{ room.id }}"
-                data-venue-slug="{{ site.data.settings.slug }}"
-                data-hourly-rate="{{ room.hourly_rate }}"
-                data-min-minutes="{{ room.min_booking_minutes }}"
-                data-max-minutes="{{ room.max_booking_minutes }}"
-                data-window-days="{{ room.booking_window_days }}"
-                data-increment="{{ room.increment_minutes }}"
-                data-opening-hours='{{ room.opening_hours | jsonify }}'
-                data-discount-tiers='{{ room.discount_tiers | jsonify }}'>
+        {%- comment -%} Already-booked slots, read-only {%- endcomment -%}
+        {% assign room_bookings = site.data.bookings | where: "room_id", room.id %}
+        {% if room_bookings.size > 0 %}
+        <div class="mt-6 border-t border-zinc-800 pt-4">
+          <p class="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Already booked</p>
+          <ul class="text-sm text-zinc-400 space-y-1">
+            {% for slot in room_bookings %}
+            <li><time datetime="{{ slot.starts_at }}">{{ slot.starts_at | date: "%a %-d %b, %H:%M" }}</time> &ndash; {{ slot.ends_at | date: "%H:%M" }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Name *</label>
-                <input type="text" name="name" required class="w-full bg-zinc-900 border border-zinc-700 rounded px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Email *</label>
-                <input type="email" name="email" required class="w-full bg-zinc-900 border border-zinc-700 rounded px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow">
-              </div>
-            </div>
+      {%- comment -%} Booking form (shows first on mobile). {%- endcomment -%}
+      <div class="order-1 lg:order-2">
+        <form class="tin-booking-form space-y-7"
+              data-room-slug="{{ room.slug }}"
+              data-room-id="{{ room.id }}"
+              data-venue-slug="{{ site.data.settings.slug }}"
+              data-hourly-rate="{{ room.hourly_rate }}"
+              data-min-minutes="{{ room.min_booking_minutes }}"
+              data-max-minutes="{{ room.max_booking_minutes }}"
+              data-window-days="{{ room.booking_window_days }}"
+              data-increment="{{ room.increment_minutes }}"
+              data-opening-hours='{{ room.opening_hours | jsonify }}'
+              data-discount-tiers='{{ room.discount_tiers | jsonify }}'>
 
-            <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Phone</label>
-              <input type="tel" name="phone" class="w-full bg-zinc-900 border border-zinc-700 rounded px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow">
-            </div>
-
+          {%- comment -%} Step 1 · When {%- endcomment -%}
+          <fieldset data-step-section="when" class="space-y-4 border-0 p-0 m-0">
+            <legend class="text-xs font-black uppercase tracking-widest text-tin-yellow mb-3">1 · When</legend>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Date *</label>
@@ -85,9 +149,13 @@ permalink: /rooms/
                 <select name="end_time" required class="tin-time-select w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow"></select>
               </div>
             </div>
-
             <p class="tin-slot-note text-xs text-zinc-500 hidden"></p>
-            <p class="tin-booking-quote text-sm text-zinc-200 hidden"></p>
+            <p class="tin-booking-quote text-base font-bold text-zinc-100 hidden"></p>
+          </fieldset>
+
+          {%- comment -%} Step 2 · Extras (hire type + equipment) {%- endcomment -%}
+          <fieldset data-step-section="extras" class="space-y-4 border-0 p-0 m-0">
+            <legend class="text-xs font-black uppercase tracking-widest text-tin-yellow mb-3">2 · Extras <span class="text-zinc-600 font-semibold normal-case tracking-normal">(optional)</span></legend>
 
             {% if room.hire_types.size > 0 %}
             <div>
@@ -115,36 +183,45 @@ permalink: /rooms/
               <p class="text-xs text-zinc-500 mt-1">Equipment is added at the listed price and confirmed subject to availability for your chosen time.</p>
             </div>
             {% endif %}
+          </fieldset>
 
+          {%- comment -%} Step 3 · Your details {%- endcomment -%}
+          <fieldset data-step-section="details" class="space-y-4 border-0 p-0 m-0">
+            <legend class="text-xs font-black uppercase tracking-widest text-tin-yellow mb-3">3 · Your details</legend>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Name *</label>
+                <input type="text" name="name" required class="w-full bg-zinc-900 border border-zinc-700 rounded px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Email *</label>
+                <input type="email" name="email" required class="w-full bg-zinc-900 border border-zinc-700 rounded px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Phone</label>
+              <input type="tel" name="phone" class="w-full bg-zinc-900 border border-zinc-700 rounded px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow">
+            </div>
             <div>
               <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">Anything else?</label>
               <textarea name="notes" rows="3" class="w-full bg-zinc-900 border border-zinc-700 rounded px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-tin-yellow resize-y"></textarea>
             </div>
+          </fieldset>
 
+          {%- comment -%} Step 4 · Confirm & pay {%- endcomment -%}
+          <fieldset data-step-section="pay" class="space-y-4 border-0 p-0 m-0">
+            <legend class="text-xs font-black uppercase tracking-widest text-tin-yellow mb-3">4 · Confirm &amp; pay</legend>
             <button type="submit" class="bg-tin-yellow text-black text-sm font-black px-8 py-3 rounded hover:bg-[#d4b040] transition-colors">
-              Request this room
+              Book this room
             </button>
             <p class="tin-booking-msg text-sm mt-2 hidden"></p>
-          </form>
-
-          {%- comment -%} Already-booked slots, read-only {%- endcomment -%}
-          {% assign room_bookings = site.data.bookings | where: "room_id", room.id %}
-          {% if room_bookings.size > 0 %}
-          <div class="mt-6 border-t border-zinc-800 pt-4">
-            <p class="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Already booked</p>
-            <ul class="text-sm text-zinc-400 space-y-1">
-              {% for slot in room_bookings %}
-              <li><time datetime="{{ slot.starts_at }}">{{ slot.starts_at | date: "%a %-d %b, %H:%M" }}</time> &ndash; {{ slot.ends_at | date: "%H:%M" }}</li>
-              {% endfor %}
-            </ul>
-          </div>
-          {% endif %}
-        </div>
-
+          </fieldset>
+        </form>
       </div>
-    </section>
-    {% endfor %}
-  </div>
+
+    </div>
+  </section>
+  {% endfor %}
   {% else %}
   <div class="bg-zinc-900 rounded-xl p-16 text-center">
     <p class="text-zinc-400">No rooms are available to hire online right now. <a href="/contact/" class="text-tin-yellow hover:underline">Get in touch</a> and we'll help.</p>
@@ -171,6 +248,55 @@ permalink: /rooms/
     box.insertBefore(el, box.firstChild);
   })();
 
+  // ── Room journey: overview ⇄ focused panel ─────────────────────────────────
+  // Progressive enhancement: panels start visible and are hidden only when JS is
+  // active (.tin-js in CSS), so the forms are always reachable without JS. Views
+  // toggle is-open/is-hidden; History pushState makes the browser Back button
+  // walk the journey rather than leave the page.
+  var overview = document.querySelector('.tin-rooms-overview');
+  var panels = Array.prototype.slice.call(document.querySelectorAll('.tin-room-panel'));
+  var canHistory = !!(window.history && history.pushState);
+
+  function renderOverview() {
+    panels.forEach(function (p) { p.classList.remove('is-open'); });
+    if (overview) overview.classList.remove('is-hidden');
+    window.scrollTo(0, 0);
+  }
+  function renderRoom(id) {
+    var panel = document.getElementById(id);
+    if (!panel || !panel.classList.contains('tin-room-panel')) { renderOverview(); return false; }
+    if (overview) overview.classList.add('is-hidden');
+    panels.forEach(function (p) { p.classList.toggle('is-open', p === panel); });
+    window.scrollTo(0, 0);
+    var first = panel.querySelector('[name=date]');
+    if (first) { try { first.focus({ preventScroll: true }); } catch (e) { } }
+    return true;
+  }
+  function goRoom(id) { if (renderRoom(id) && canHistory) history.pushState({ room: id }, '', '#' + id); }
+  function goOverview() { renderOverview(); if (canHistory) history.pushState({ room: null }, '', location.pathname + location.search); }
+
+  document.querySelectorAll('.tin-room-card').forEach(function (card) {
+    card.addEventListener('click', function (e) {
+      var id = (card.getAttribute('href') || '').replace('#', '');
+      if (!document.getElementById(id)) return; // nothing to open — let the browser handle it
+      e.preventDefault();
+      goRoom(id);
+    });
+  });
+  document.querySelectorAll('.tin-back').forEach(function (b) {
+    b.addEventListener('click', goOverview);
+  });
+
+  // Browser Back/Forward walks the overview ⇄ room journey (no re-push).
+  window.addEventListener('popstate', function () {
+    var h = (location.hash || '').replace('#', '');
+    if (h && document.getElementById(h)) renderRoom(h); else renderOverview();
+  });
+
+  // Deep-link: /rooms/#room-<slug> opens that room; otherwise the overview.
+  var initial = (location.hash || '').replace('#', '');
+  if (initial && document.getElementById(initial)) renderRoom(initial); else renderOverview();
+
   if (!window.fetch) return;
 
   function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -183,6 +309,43 @@ permalink: /rooms/
     return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][d.getDay()];
   }
   function iso(date, time) { if (!date || !time) return ''; return date + 'T' + time + ':00'; }
+
+  // ── Progress stepper ───────────────────────────────────────────────────────
+  // A step is "done" once its fields are satisfied (extras is optional, so it's
+  // done as soon as the slot is chosen). The current step is the first not-done;
+  // "pay" becomes current once when + details are complete. Clicking a step
+  // scrolls to its section.
+  function setupStepper(panel, form) {
+    var ORDER = ['when', 'extras', 'details', 'pay'];
+    function filled(name) { var el = form.querySelector('[name=' + name + ']'); return el && el.value && el.value.trim() !== ''; }
+    function done(step) {
+      if (step === 'when') return filled('date') && filled('start_time') && filled('end_time');
+      if (step === 'extras') return done('when');
+      if (step === 'details') return filled('name') && /.+@.+/.test((form.querySelector('[name=email]') || {}).value || '');
+      return false; // pay
+    }
+    function update() {
+      var currentSet = false;
+      ORDER.forEach(function (step) {
+        var el = panel.querySelector('.tin-step[data-step="' + step + '"]');
+        if (!el) return;
+        if (done(step)) { el.setAttribute('data-state', 'done'); }
+        else if (!currentSet) { el.setAttribute('data-state', 'current'); currentSet = true; }
+        else { el.setAttribute('data-state', 'upcoming'); }
+      });
+      // 'pay' is never "done", so the loop above already marks it current once
+      // every prior step is done — no special-case needed.
+    }
+    panel.querySelectorAll('.tin-step').forEach(function (s) {
+      s.addEventListener('click', function () {
+        var sec = panel.querySelector('[data-step-section="' + s.dataset.step + '"]');
+        if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+    form.addEventListener('input', update);
+    form.addEventListener('change', update);
+    update();
+  }
 
   document.querySelectorAll('.tin-booking-form').forEach(function (form) {
     var msg = form.querySelector('.tin-booking-msg');
@@ -389,6 +552,8 @@ permalink: /rooms/
         })
         .catch(function () { show('Something went wrong - please try again.', false); });
     });
+
+    setupStepper(form.closest('.tin-room-panel'), form);
   });
 }());
 </script>
